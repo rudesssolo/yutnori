@@ -25,7 +25,7 @@ Gioco tradizionale coreano in un singolo file HTML — zero dipendenze, offline-
 
 ## Come giocare
 
-1. Apri `index.html` in un browser
+1. Apri `yutnori.html` in un browser
 2. Scegli modalità (2 giocatori / CPU), chi inizia, tema e lingua
 3. Lancia i bastoncini 🎲 e muovi le pedine
 4. Porta tutte e 4 le tue pedine fuori dal tabellone per vincere
@@ -80,7 +80,7 @@ Traditional Korean board game in a single HTML file — zero dependencies, offli
 
 ## How to play
 
-1. Open `index.html` in a browser
+1. Open `yutnori.html` in a browser
 2. Choose mode (2 players / CPU), who starts, theme and language
 3. Throw the sticks 🎲 and move your pieces
 4. Get all 4 pieces out of the board to win
