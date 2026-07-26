@@ -11,12 +11,17 @@
   --gold:#ffd166; --good:#5ddc8a; --bad:#ff6b6b;
   --txt:#eaf0ff; --mut:#8b98bd; --rad:18px;
   --shadow:0 18px 50px rgba(0,0,0,.45);
+  --node-fill:rgba(18,25,50,.85); --node-stroke:rgba(255,255,255,.22); --node-special-fill:rgba(40,32,12,.7); --node-special-stroke:#ffd166;
+  --edge-stroke:rgba(255,255,255,.16); --diag-stroke:rgba(255,209,102,.18); --board-label:rgba(255,255,255,.55); --piece-ring:#fff; --zone-fill:rgba(255,255,255,.06); --zone-stroke:rgba(255,255,255,.18);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Noto Sans KR",sans-serif;color:var(--txt);
   background:radial-gradient(1100px 760px at 78% -8%,#1d2a55 0%,transparent 60%),radial-gradient(900px 700px at 8% 108%,#3a1d4a 0%,transparent 55%),linear-gradient(180deg,var(--bg0),var(--bg1));
   min-height:100vh;overflow-x:hidden}
+body[data-theme="traditional"]{--bg0:#21150d;--bg1:#5a351d;--panel:rgba(61,35,18,.62);--panel-bd:rgba(255,223,158,.3);--p1:#d45b44;--p1d:#853225;--p2:#4f9cb2;--p2d:#23596b;--gold:#f2c66d;--good:#8fbd76;--bad:#d45b44;--txt:#fff1cf;--mut:#d4b98a;--shadow:0 18px 50px rgba(27,13,5,.58);--node-fill:#e3c78f;--node-stroke:#5d381d;--node-special-fill:#b97b3e;--node-special-stroke:#4c2815;--edge-stroke:#6a3d1e;--diag-stroke:#a45f2b;--board-label:#4c2815;--piece-ring:#fff0ca;--zone-fill:rgba(91,51,22,.2);--zone-stroke:#7a4824;background:radial-gradient(1000px 700px at 80% -10%,rgba(191,133,66,.55),transparent 60%),repeating-linear-gradient(115deg,rgba(255,215,145,.025) 0 2px,transparent 2px 8px),linear-gradient(180deg,var(--bg0),var(--bg1))}
+body[data-theme="traditional"] .board-wrap{background:repeating-linear-gradient(35deg,rgba(115,68,31,.08) 0 2px,transparent 2px 9px),linear-gradient(135deg,#efd8a6,#c99455);border-color:#80502a;box-shadow:inset 0 0 0 8px rgba(83,45,20,.2),var(--shadow)}
+body[data-theme="traditional"] header.topbar{background:rgba(36,20,10,.78)}
 .hidden{display:none!important}
 button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 .screen{min-height:100vh}
@@ -46,6 +51,9 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 .mode-card .ico{font-size:40px;display:block;margin-bottom:8px}
 .mode-card h3{font-size:18px;margin-bottom:4px}
 .mode-card p{color:var(--mut);font-size:13px}
+.cpu-difficulty{margin:-4px 0 22px;text-align:left}.cpu-difficulty>span{display:block;margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.difficulty-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.difficulty-card{min-height:88px;padding:10px 8px;border:1px solid var(--panel-bd);border-radius:12px;background:rgba(255,255,255,.04);text-align:left;transition:border-color .14s,background .14s,transform .14s}.difficulty-card:hover{transform:translateY(-2px)}.difficulty-card.sel{border-color:var(--gold);background:rgba(255,209,102,.1)}.difficulty-card b{display:block;font-size:14px}.difficulty-card small{display:block;margin-top:5px;color:var(--mut);font-size:11px;line-height:1.25}
+.theme-picker{margin:-4px 0 22px;text-align:left}.theme-picker>span{display:block;margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}.theme-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}.theme-card{padding:11px 12px;border:1px solid var(--panel-bd);border-radius:12px;background:rgba(255,255,255,.04);text-align:left;transition:border-color .14s,background .14s,transform .14s}.theme-card:hover{transform:translateY(-2px)}.theme-card.sel{border-color:var(--gold);background:rgba(255,209,102,.1)}.theme-card b{display:block;font-size:14px}.theme-card small{display:block;margin-top:4px;color:var(--mut);font-size:11px}
 .opts{display:flex;flex-direction:column;gap:10px;max-width:420px;margin:0 auto 26px;text-align:left}
 .opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px solid var(--panel-bd);background:rgba(255,255,255,.04);cursor:pointer}
 .opt .lbl{flex:1}.opt .lbl b{display:block}.opt .lbl small{color:var(--mut);font-size:12px}
@@ -78,6 +86,7 @@ main.game{flex:1;display:grid;grid-template-columns:minmax(300px,1fr) 360px;gap:
 .pstat .dot{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;opacity:.4}
 .pstat .dot.home{opacity:1;cursor:pointer}
 .pstat .dot.done{background:var(--good);border-color:var(--good);opacity:1}
+.pstat .dot.pop{animation:scorepop .42s ease-out}
 .sticks-area{display:flex;flex-direction:column;align-items:center;gap:10px}
 .sticks{display:flex;gap:14px;height:110px;align-items:center;perspective:700px}
 .stick{width:34px;height:92px;border-radius:18px;position:relative;transform-style:preserve-3d;transition:transform .3s}
@@ -87,45 +96,72 @@ main.game{flex:1;display:grid;grid-template-columns:minmax(300px,1fr) 360px;gap:
 .stick .mark{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;background:var(--bad);box-shadow:0 0 6px var(--bad)}
 .stick.flipping{animation:flip .85s cubic-bezier(.3,.1,.25,1)}
 @keyframes flip{0%{transform:translateY(0) rotateX(0)}25%{transform:translateY(-30px) rotateX(360deg)}50%{transform:translateY(6px) rotateX(720deg)}75%{transform:translateY(-12px) rotateX(940deg)}100%{transform:translateY(0) rotateX(1080deg)}}
-.result-label{font-size:22px;font-weight:800;min-height:30px;text-align:center}
+.result-label{height:32px;font-size:22px;font-weight:800;line-height:32px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .result-label .kr{font-size:26px}
 .result-label.pop{animation:pop .4s cubic-bezier(.2,1.5,.4,1)}
 @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes bell{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}
 #logBtn.pulse{animation:bell .6s ease}
-.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:34px}
+.chips{display:flex;flex-wrap:nowrap;gap:8px;height:34px;overflow-x:auto}
 .chip{padding:6px 14px;border-radius:999px;font-weight:700;font-size:14px;border:1px solid var(--gold);background:rgba(255,209,102,.12);color:var(--gold);cursor:pointer;transition:all .14s}
 .chip:hover{background:rgba(255,209,102,.22)}
 .chip.sel{background:var(--gold);color:#231303}
 .chip.back{border-color:var(--bad);background:rgba(255,107,107,.14);color:var(--bad)}
 .chip.back.sel{background:var(--bad);color:#fff}
-.log{max-height:170px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.log{height:170px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:13px}
 .log .row{padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.04);border-left:3px solid var(--panel-bd);line-height:1.4}
 .log .row.p1{border-left-color:var(--p1)}.log .row.p2{border-left-color:var(--p2)}.log .row.win{border-left-color:var(--gold)}
-.hint{font-size:13px;color:var(--mut);text-align:center;min-height:20px}
-.node-bg{fill:rgba(18,25,50,.85);stroke:rgba(255,255,255,.22)}
-.node-bg.special{fill:rgba(40,32,12,.7);stroke:#ffd166}
-.edge{stroke:rgba(255,255,255,.16);stroke-width:5;fill:none;stroke-linecap:round}
-.edge.diag{stroke:rgba(255,209,102,.18)}
+.hint{height:20px;overflow:hidden;font-size:13px;color:var(--mut);text-align:center}
+.node-bg{fill:var(--node-fill);stroke:var(--node-stroke)}
+.node-bg.special{fill:var(--node-special-fill);stroke:var(--node-special-stroke)}
+.edge{stroke:var(--edge-stroke);stroke-width:5;fill:none;stroke-linecap:round}
+.edge.diag{stroke:var(--diag-stroke)}
+.reserve-slot{fill:var(--zone-fill);stroke:var(--zone-stroke);stroke-width:2;stroke-dasharray:4 6}
+.fly-piece{position:fixed;z-index:120;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:50%;pointer-events:none;box-shadow:0 0 0 3px var(--piece-ring),0 6px 18px rgba(0,0,0,.45);transition:transform .55s cubic-bezier(.34,.8,.3,1),opacity .55s ease}
+.fly-piece.p1{background:radial-gradient(circle at 35% 30%,var(--p1),var(--p1d))}
+.fly-piece.p2{background:radial-gradient(circle at 35% 30%,var(--p2),var(--p2d))}
+@keyframes scorepop{0%{transform:scale(.35)}55%{transform:scale(1.5)}100%{transform:scale(1)}}
 .piece{transition:transform .2s ease,filter .15s ease}
 .piece.movable{cursor:pointer;filter:drop-shadow(0 0 6px rgba(255,209,102,.9))}
-.piece .ring{fill:none;stroke:#fff;stroke-width:3;opacity:.85}
+.piece.entering,.piece.reserve-fly{filter:drop-shadow(0 7px 11px rgba(0,0,0,.5))}
+.piece .ring{fill:none;stroke:var(--piece-ring);stroke-width:3;opacity:.85}
 .hl{cursor:pointer}
 .hl circle{fill:rgba(255,209,102,.28);stroke:#ffd166;stroke-width:3;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
-text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:central;fill:rgba(255,255,255,.55);pointer-events:none}
+text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:central;fill:var(--board-label);pointer-events:none}
 .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,8,18,.72);backdrop-filter:blur(8px);z-index:60;padding:24px}
-.win-card{max-width:420px;width:100%;text-align:center;padding:44px 36px}
+.win-card{max-width:680px;width:100%;max-height:calc(100dvh - 48px);overflow:auto;text-align:center;padding:44px 36px}
 .win-card .trophy{font-size:64px}
 .win-card h2{font-size:30px;margin:10px 0 6px}
 .win-card p{color:var(--mut);margin-bottom:24px}
 .win-card .row{display:flex;gap:12px;justify-content:center}
+.match-stats{margin:0 0 24px;text-align:left}
+.match-stats h3{font-size:14px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin-bottom:10px}
+.momentum{margin:0 0 16px;padding:12px;border:1px solid var(--panel-bd);border-radius:12px;background:rgba(255,255,255,.04)}
+.mom-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px 14px;margin-bottom:8px}
+.mom-head h4{margin:0;font-size:13px;font-weight:700}
+.mom-legend{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--mut)}
+.mom-legend span{display:flex;align-items:center;gap:6px}.mom-legend i{display:block;width:9px;height:9px;border-radius:50%;flex:none}
+.mom-legend i.ev{border-radius:2px;transform:rotate(45deg)}
+.mom-wrap{position:relative}
+.mom-wrap svg{display:block;width:100%;height:auto;overflow:visible}
+.mom-note{margin:6px 0 0;font-size:11px;color:var(--mut)}
+.mom-tip{position:absolute;z-index:5;min-width:104px;padding:7px 9px;border:1px solid var(--panel-bd);border-radius:9px;background:var(--panel);backdrop-filter:blur(8px);font-size:11px;line-height:1.35;color:var(--txt);pointer-events:none;transform:translate(-50%,-100%);white-space:nowrap;box-shadow:var(--shadow)}
+.mom-tip b{color:var(--gold)}
+.mom-tip.hidden{display:none}
+.stats-players{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stats-player{padding:12px;border:1px solid var(--panel-bd);border-radius:12px;background:rgba(255,255,255,.04)}
+.stats-player h4{display:flex;align-items:center;gap:7px;margin:0 0 10px;font-size:14px}.stats-player h4 i{display:block;width:9px;height:9px;border-radius:50%}
+.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.stat{padding:7px;border-radius:8px;background:rgba(255,255,255,.045)}.stat b{display:block;font-size:15px;color:var(--gold)}.stat span{display:block;margin-top:2px;font-size:10px;line-height:1.15;color:var(--mut)}
 #fxlayer{position:absolute;inset:0;pointer-events:none;z-index:20;overflow:hidden}
 .particle{position:absolute;width:10px;height:10px;border-radius:2px;pointer-events:none}
 .confetti{position:fixed;width:10px;height:14px;border-radius:2px;pointer-events:none;z-index:70}
 @media(max-width:980px){
+  .momentum{padding:9px;margin-bottom:12px}.mom-head h4{font-size:12px}.mom-legend{gap:9px;font-size:10px}.mom-tip{min-width:0;font-size:10px}
   #gameScreen{height:100vh;height:100dvh;overflow:hidden}
-  main.game{display:flex;flex-direction:column;grid-template-columns:none;gap:8px;padding:8px;max-width:none;align-items:stretch}
+  header.topbar{gap:6px;padding:8px}.topbar .title{font-size:16px;white-space:nowrap}.topbar .title span{display:none}.lang-switch.sm button{padding:3px 5px}.icon-btn{width:34px;height:34px;font-size:17px}
+  main.game{display:flex;flex-direction:column;grid-template-columns:none;gap:8px;padding:8px;max-width:none;align-items:stretch;min-height:0}
   .board-wrap{flex:1 1 auto;min-height:0;max-width:none;width:100%;aspect-ratio:auto;margin:0}
   #board{height:100%;width:100%}
   .panel{order:0;flex:none;gap:0}
@@ -141,23 +177,24 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
   .pstat .nm{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pstat .dots{gap:4px;flex:none}
   .pstat .dot{width:18px;height:18px}
-  .sticks-area{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+  .sticks-area{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;min-height:0}
   .sticks{height:50px;gap:6px;flex:none;order:2}
   .stick{width:20px;height:46px;border-radius:10px}
   .stick .face{border-radius:10px}
   .stick .mark{width:6px;height:6px;top:3px}
-  .result-label{font-size:15px;min-height:18px;flex:1 1 100%;order:1;text-align:center}
+  .result-label{height:24px;font-size:15px;line-height:24px;flex:1 1 100%;order:1;text-align:center}
   .result-label .kr{font-size:18px}
   #throwBtn{padding:.5em 1em;font-size:14px;white-space:nowrap;flex:none;order:3}
   .chips{flex-wrap:nowrap;overflow-x:auto;min-height:30px}
   .chip{padding:5px 10px;font-size:13px;flex:none}
   .hint{font-size:12px}
-  #logDrawer{position:fixed;left:0;right:0;bottom:0;max-height:58vh;transform:translateY(102%);transition:transform .3s ease;z-index:45;border-radius:18px 18px 0 0;padding-bottom:max(14px,env(safe-area-inset-bottom))}
+  #logDrawer{position:fixed;left:0;right:0;bottom:0;height:58vh;transform:translateY(102%);transition:transform .3s ease;z-index:45;border-radius:18px 18px 0 0;padding-bottom:max(14px,env(safe-area-inset-bottom))}
   #logDrawer.open{transform:translateY(0)}
-  #logDrawer .log{max-height:44vh}
+  #logDrawer .log{height:44vh}
   #logClose{display:grid;width:34px;height:34px;font-size:16px}
   #logBtn{display:grid}
 }
+@media(max-width:480px){.difficulty-options{grid-template-columns:1fr}.difficulty-card{min-height:0;text-align:center}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.05ms!important}}
 </style>
 </head>
@@ -176,6 +213,29 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
       <div class="mode-card sel" data-mode="pvp"><span class="ico">👥</span><h3 data-i18n="mode.pvp.title">2 Giocatori</h3><p data-i18n="mode.pvp.desc">Gioca in due, sullo stesso dispositivo</p></div>
       <div class="mode-card" data-mode="cpu"><span class="ico">🤖</span><h3 data-i18n="mode.cpu.title">Contro la CPU</h3><p data-i18n="mode.cpu.desc">Affronta il computer</p></div>
     </div>
+    <div class="cpu-difficulty hidden" id="cpuDifficulty">
+      <span data-cpu-i18n="title">Difficoltà CPU</span>
+      <div class="difficulty-options">
+        <button class="difficulty-card" data-cpu-level="easy"><b data-cpu-i18n="easy.title">🙂 Facile</b><small data-cpu-i18n="easy.desc">Scelte più casuali</small></button>
+        <button class="difficulty-card sel" data-cpu-level="normal"><b data-cpu-i18n="normal.title">🧠 Normale</b><small data-cpu-i18n="normal.desc">Strategia equilibrata</small></button>
+        <button class="difficulty-card" data-cpu-level="hard"><b data-cpu-i18n="hard.title">🔥 Difficile</b><small data-cpu-i18n="hard.desc">Più aggressiva e prudente</small></button>
+      </div>
+    </div>
+    <div class="theme-picker">
+      <span data-theme-i18n="title">Tema del tabellone</span>
+      <div class="theme-options">
+        <button class="theme-card sel" data-theme-choice="modern"><b data-theme-i18n="modern.title">✦ Modern</b><small data-theme-i18n="modern.desc">L'aspetto attuale</small></button>
+        <button class="theme-card" data-theme-choice="traditional"><b data-theme-i18n="traditional.title">🪵 Traditional</b><small data-theme-i18n="traditional.desc">Carta e legno coreani</small></button>
+      </div>
+    </div>
+    <div class="theme-picker" id="starterPicker">
+      <span data-start-i18n="title">Chi inizia</span>
+      <div class="difficulty-options">
+        <button class="difficulty-card sel" data-starter="p1"><b data-start-i18n="p1.title">🔴 Rosso</b><small data-start-i18n="p1.desc">Muove per primo</small></button>
+        <button class="difficulty-card" data-starter="p2"><b data-start-i18n="p2.title">🔵 Blu</b><small data-start-i18n="p2.desc">Il secondo giocatore (o la CPU)</small></button>
+        <button class="difficulty-card" data-starter="random"><b data-start-i18n="random.title">🎲 Casuale</b><small data-start-i18n="random.desc">Lo decidono i bastoncini</small></button>
+      </div>
+    </div>
     <div class="opts">
       <div class="opt on" id="optBack"><div class="lbl"><b data-i18n="opt.backdo.title">Regola Back-do (빽도)</b><small data-i18n="opt.backdo.desc">Se esce solo il bastoncino segnato, la pedina torna indietro di 1</small></div><div class="switch"></div></div>
       <div class="opt on" id="optSound"><div class="lbl"><b data-i18n="opt.sound.title">Effetti sonori</b><small data-i18n="opt.sound.desc">Suoni sintetizzati, nessun file esterno</small></div><div class="switch"></div></div>
@@ -188,6 +248,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
         <li data-i18n-html="rules.3">Atterri su una pedina avversaria? La <b>catturi</b> (torna all'inizio) e lanci di nuovo. Sulla tua? Si <b>raggruppano</b> e viaggiano insieme.</li>
         <li data-i18n-html="rules.4">Fermandoti su un angolo o al centro puoi imboccare le <b>scorciatoie diagonali</b>.</li>
         <li data-i18n-html="rules.5">Vince chi porta fuori tutte e 4 le pedine.</li>
+        <li data-finish-i18n="rule">Arrivare alla casella finale non basta: serve un passo ulteriore per uscire dal circuito.</li>
       </ul>
     </details>
     <button class="btn" id="startBtn" style="font-size:18px;padding:.85em 2.2em" data-i18n="setup.start">▶ Inizia la partita</button>
@@ -204,6 +265,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
       <button data-lang="ko">한</button>
       <button data-lang="zh">中</button>
     </div>
+    <button class="icon-btn" id="themeBtn" data-theme-tt="toggle">🎨</button>
     <button class="icon-btn" id="logBtn" data-i18n-tt="header.diary">📜</button>
     <button class="icon-btn" id="soundBtn" data-i18n-tt="header.audio">🔊</button>
     <button class="icon-btn" id="homeBtn" data-i18n-tt="header.menu">☰</button>
@@ -247,6 +309,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
     <div class="trophy">🏆</div>
     <h2 id="winTitle">Vince!</h2>
     <p id="winSub">Tutte le pedine hanno completato il percorso.</p>
+    <div class="match-stats" id="matchStats"></div>
     <div class="row">
       <button class="btn" id="rematchBtn" data-i18n="win.rematch">🔁 Rivincita</button>
       <button class="btn ghost" id="menuBtn" data-i18n="win.menu">☰ Menu</button>
@@ -265,23 +328,59 @@ function el(tag,attrs={},parent){const e=document.createElementNS(SVGNS,tag);for
 const I18N={
 cur:localStorage.getItem('yutnori_lang')||'it',
 dict:{
-it:{tagline:"Yutnori · Il tradizionale gioco da tavolo coreano",'mode.pvp.title':"2 Giocatori",'mode.pvp.desc':"Gioca in due, sullo stesso dispositivo",'mode.cpu.title':"Contro la CPU",'mode.cpu.desc':"Affronta il computer",'opt.backdo.title':"Regola Back-do (빽도)",'opt.backdo.desc':"Se esce solo il bastoncino segnato, la pedina torna indietro di 1",'opt.sound.title':"Effetti sonori",'opt.sound.desc':"Suoni sintetizzati, nessun file esterno",'rules.summary':"📜 Come si gioca",'rules.1':"Lancia i 4 bastoncini: <b>도 Do</b>=1, <b>개 Gae</b>=2, <b>걸 Geol</b>=3, <b>윷 Yut</b>=4, <b>모 Mo</b>=5 passi. Con Yut e Mo lanci di nuovo.",'rules.2':"Porta le tue 4 pedine lungo il percorso (senso antiorario) e falle uscire dal traguardo.",'rules.3':"Atterri su una pedina avversaria? La <b>catturi</b> (torna all'inizio) e lanci di nuovo. Sulla tua? Si <b>raggruppano</b> e viaggiano insieme.",'rules.4':"Fermandoti su un angolo o al centro puoi imboccare le <b>scorciatoie diagonali</b>.",'rules.5':"Vince chi porta fuori tutte e 4 le pedine.",'setup.start':"▶ Inizia la partita",brand:"Yutnori",'panel.turn':"Turno",'panel.sticks':"Bastoncini",'panel.pending':"Tiri da usare",'panel.diary':"Diario",'throw.btn':"🎲 Lancia i bastoncini",'result.again':"↑rilancia",'hint.cpu':"La CPU sta giocando…",'hint.throw':"Lancia i bastoncini!",'hint.selectChip':"Scegli un tiro, poi una pedina.",'hint.selectPiece':"Scegli una pedina da muovere.",'player.1':"Giocatore 1",'player.2':"Giocatore 2",'player.cpu':"CPU",'win.title':"{0} vince!",'win.subtitle':"Tutte e 4 le pedine hanno completato il percorso. 잘했어요!",'win.rematch':"🔁 Rivincita",'win.menu':"☰ Menu",'log.newgame':"Nuova partita iniziata. Benvenuti nel 윷놀이!",'log.turn':"Turno di <b>{0}</b>.",'log.roll':"<b>{0}</b> lancia {1} {2} ({3}).{4}",'log.extra':" Rilancia!",'log.capture':"<b>{0}</b> cattura {1} pedine! Rilancia.",'log.capture.one':"<b>{0}</b> cattura una pedina! Rilancia.",'log.group':"<b>{0}</b> raggruppa le pedine (업기).",'log.finish':"<b>{0}</b> fa uscire {1} pedine! ({2}/4)",'log.finish.one':"<b>{0}</b> fa uscire una pedina! ({2}/4)",'log.backhome':"<b>{0}</b> torna indietro (빽도) fino a casa.",'log.nomove':"<b>{0}</b>: nessuna mossa valida, tiri persi.",'header.diary':"Diario",'header.audio':"Audio",'header.menu':"Menu",'header.close':"Chiudi"},
-ko:{tagline:"윷놀이 · 한국의 전통 보드게임",'mode.pvp.title':"2인용",'mode.pvp.desc':"같은 기기에서 둘이서 플레이",'mode.cpu.title':"CPU 대전",'mode.cpu.desc':"컴퓨터와 대결하세요",'opt.backdo.title':"빽도 규칙",'opt.backdo.desc':"표시된 윷가락만 뒷면이면 1칸 뒤로",'opt.sound.title':"효과음",'opt.sound.desc':"합성 음향, 외부 파일 없음",'rules.summary':"📜 게임 방법",'rules.1':"윷가락 4개를 던지세요: <b>도 1</b>, <b>개 2</b>, <b>걸 3</b>, <b>윷 4</b>, <b>모 5칸</b>. 윷이나 모가 나오면 한 번 더 던집니다.",'rules.2':"4개의 말을 반시계 방향으로 돌아 출발점을 통과해 빼세요.",'rules.3':"상대 말 위에 멈추면 <b>잡습니다</b>(출발점으로) → 한 번 더. 내 말 위에 멈추면 <b>업고</b> 함께 갑니다.",'rules.4':"모서리나 중앙에 정확히 멈추면 <b>지름길</b>(대각선)을 탈 수 있습니다.",'rules.5':"4개의 말을 모두 빼면 이깁니다.",'setup.start':"▶ 게임 시작",brand:"",'panel.turn':"차례",'panel.sticks':"윷가락",'panel.pending':"사용할 윷",'panel.diary':"기록",'throw.btn':"🎲 윷 던지기",'result.again':"↑한 번 더",'hint.cpu':"CPU가 두는 중…",'hint.throw':"윷을 던지세요!",'hint.selectChip':"윷을 고른 뒤 말을 선택하세요.",'hint.selectPiece':"움직일 말을 선택하세요.",'player.1':"플레이어 1",'player.2':"플레이어 2",'player.cpu':"CPU",'win.title':"{0} 승리!",'win.subtitle':"4개의 말이 모두 코스를 통과했습니다. 잘했어요!",'win.rematch':"🔁 다시 하기",'win.menu':"☰ 메뉴",'log.newgame':"새 게임이 시작되었습니다. 윷놀이에 오신 것을 환영합니다!",'log.turn':"<b>{0}</b>의 차례.",'log.roll':"<b>{0}</b>이(가) {1} {2}({3})을(를) 던졌습니다.{4}",'log.extra':" 한 번 더!",'log.capture':"<b>{0}</b>이(가) {1}개를 잡았습니다! 한 번 더!",'log.capture.one':"<b>{0}</b>이(가) 말을 잡았습니다! 한 번 더!",'log.group':"<b>{0}</b>이(가) 말을 업었습니다(업기).",'log.finish':"<b>{0}</b>이(가) {1}개 말을 빼냈습니다! ({2}/4)",'log.finish.one':"<b>{0}</b>이(가) 말을 빼냈습니다! ({2}/4)",'log.backhome':"<b>{0}</b>이(가) 집으로 돌아갔습니다(빽도).",'log.nomove':"<b>{0}</b>: 둘 수가 없어 윷을 잃었습니다.",'header.diary':"기록",'header.audio':"소리",'header.menu':"메뉴",'header.close':"닫기"},
-zh:{tagline:"尤茨游戏 · 韩国传统桌面游戏",'mode.pvp.title':"双人对战",'mode.pvp.desc':"同一设备上两人对战",'mode.cpu.title':"对战电脑",'mode.cpu.desc':"挑战计算机",'opt.backdo.title':"后走规则(빽도)",'opt.backdo.desc':"仅标记木棒朝上时，棋子后退1步",'opt.sound.title':"音效",'opt.sound.desc':"合成音效，无外部文件",'rules.summary':"📜 游戏方法",'rules.1':"投掷4根木棒：<b>도 1</b>、<b>개 2</b>、<b>걸 3</b>、<b>윷 4</b>、<b>모 5步</b>。掷出윷或모可再投一次。",'rules.2':"将4枚棋子沿逆时针方向绕行并从起点退出。",'rules.3':"停在对手棋子上即可<b>吃子</b>(送回起点)并再投一次；停在自己棋子上则<b>叠放</b>同行。",'rules.4':"正好停在角落或中心时可走<b>对角捷径</b>。",'rules.5':"先将4枚棋子全部退出者获胜。",'setup.start':"▶ 开始游戏",brand:"尤茨",'panel.turn':"回合",'panel.sticks':"木棒",'panel.pending':"可用投数",'panel.diary':"日志",'throw.btn':"🎲 投掷木棒",'result.again':"↑再投一次",'hint.cpu':"电脑思考中…",'hint.throw':"请投掷木棒！",'hint.selectChip':"请先选择投数，再选棋子。",'hint.selectPiece':"请选择要移动的棋子。",'player.1':"玩家 1",'player.2':"玩家 2",'player.cpu':"电脑",'win.title':"{0} 获胜！",'win.subtitle':"4枚棋子全部完成绕行。做得好！",'win.rematch':"🔁 再来一局",'win.menu':"☰ 菜单",'log.newgame':"新游戏开始。欢迎来到尤茨游戏！",'log.turn':"<b>{0}</b>的回合。",'log.roll':"<b>{0}</b>掷出{1} {2}({3})。{4}",'log.extra':" 再投一次！",'log.capture':"<b>{0}</b>吃掉{1}枚棋子！再投一次！",'log.capture.one':"<b>{0}</b>吃掉一枚棋子！再投一次！",'log.group':"<b>{0}</b>叠放棋子(업기)。",'log.finish':"<b>{0}</b>退出{1}枚棋子！({2}/4)",'log.finish.one':"<b>{0}</b>退出一枚棋子！({2}/4)",'log.backhome':"<b>{0}</b>后退回家(빽도)。",'log.nomove':"<b>{0}</b>：无有效走法，投数作废。",'header.diary':"日志",'header.audio':"声音",'header.menu':"菜单",'header.close':"关闭"},
-en:{tagline:"Yutnori · The traditional Korean board game",'mode.pvp.title':"2 Players",'mode.pvp.desc':"Play with a friend on the same device",'mode.cpu.title':"vs CPU",'mode.cpu.desc':"Challenge the computer",'opt.backdo.title':"Back-do rule (빽도)",'opt.backdo.desc':"If only the marked stick is flat, your piece moves 1 step backward",'opt.sound.title':"Sound effects",'opt.sound.desc':"Synthesized sounds, no external files",'rules.summary':"📜 How to play",'rules.1':"Throw the 4 sticks: <b>도 Do</b>=1, <b>개 Gae</b>=2, <b>걸 Geol</b>=3, <b>윷 Yut</b>=4, <b>모 Mo</b>=5 steps. Yut and Mo grant an extra throw.",'rules.2':"Move your 4 pieces counter-clockwise around the board and exit through the start.",'rules.3':"Land on an opponent's piece? <b>Capture</b> it (back to start) and throw again. Land on your own? They <b>stack</b> and move together.",'rules.4':"Landing exactly on a corner or the center lets you take the <b>diagonal shortcut</b>.",'rules.5':"First to get all 4 pieces out wins.",'setup.start':"▶ Start game",brand:"Yutnori",'panel.turn':"Turn",'panel.sticks':"Sticks",'panel.pending':"Pending throws",'panel.diary':"Log",'throw.btn':"🎲 Throw sticks",'result.again':"↑roll again",'hint.cpu':"CPU is thinking…",'hint.throw':"Throw the sticks!",'hint.selectChip':"Pick a throw value, then pick a piece.",'hint.selectPiece':"Pick a piece to move.",'player.1':"Player 1",'player.2':"Player 2",'player.cpu':"CPU",'win.title':"{0} wins!",'win.subtitle':"All 4 pieces have completed the course. 잘했어요!",'win.rematch':"🔁 Rematch",'win.menu':"☰ Menu",'log.newgame':"New game started. Welcome to Yutnori!",'log.turn':"<b>{0}</b>'s turn.",'log.roll':"<b>{0}</b> threw {1} {2} ({3}).{4}",'log.extra':" Roll again!",'log.capture':"<b>{0}</b> captured {1} pieces! Roll again.",'log.capture.one':"<b>{0}</b> captured a piece! Roll again.",'log.group':"<b>{0}</b> stacked pieces (업기).",'log.finish':"<b>{0}</b> brought out {1} pieces! ({2}/4)",'log.finish.one':"<b>{0}</b> brought out a piece! ({2}/4)",'log.backhome':"<b>{0}</b> went back home (빽도).",'log.nomove':"<b>{0}</b>: no valid moves, throw lost.",'header.diary':"Log",'header.audio':"Sound",'header.menu':"Menu",'header.close':"Close"}
+it:{tagline:"Yutnori · Il tradizionale gioco da tavolo coreano",'mode.pvp.title':"2 Giocatori",'mode.pvp.desc':"Gioca in due, sullo stesso dispositivo",'mode.cpu.title':"Contro la CPU",'mode.cpu.desc':"Affronta il computer",'opt.backdo.title':"Regola Back-do (빽도)",'opt.backdo.desc':"Se esce solo il bastoncino segnato, la pedina torna indietro di 1",'opt.sound.title':"Effetti sonori",'opt.sound.desc':"Suoni sintetizzati, nessun file esterno",'rules.summary':"📜 Come si gioca",'rules.1':"Lancia i 4 bastoncini: <b>도 Do</b>=1, <b>개 Gae</b>=2, <b>걸 Geol</b>=3, <b>윷 Yut</b>=4, <b>모 Mo</b>=5 passi. Con Yut e Mo lanci di nuovo.",'rules.2':"Porta le tue 4 pedine lungo il percorso (senso antiorario) e falle uscire dal traguardo.",'rules.3':"Atterri su una pedina avversaria? La <b>catturi</b> (torna all'inizio) e lanci di nuovo. Sulla tua? Si <b>raggruppano</b> e viaggiano insieme.",'rules.4':"Fermandoti su un angolo o al centro puoi imboccare le <b>scorciatoie diagonali</b>.",'rules.5':"Vince chi porta fuori tutte e 4 le pedine.",'setup.start':"▶ Inizia la partita",brand:"Yutnori",'panel.turn':"Turno",'panel.sticks':"Bastoncini",'panel.pending':"Tiri da usare",'panel.diary':"Diario",'throw.btn':"🎲 Lancia i bastoncini",'result.again':"↑rilancia",'hint.cpu':"La CPU sta giocando…",'hint.throw':"Lancia i bastoncini!",'hint.selectChip':"Scegli un tiro, poi una pedina.",'hint.selectPiece':"Scegli una pedina da muovere.",'player.1':"Giocatore 1",'player.2':"Giocatore 2",'player.cpu':"CPU",'win.title':"{0} vince!",'win.subtitle':"Tutte e 4 le pedine hanno completato il percorso. 잘했어요!",'win.rematch':"🔁 Rivincita",'win.menu':"☰ Menu",'log.rolloff':"<b>Sorteggio</b> del primo giocatore: tirano entrambi, chi fa più alto inizia.",'log.rolloff.throw':"Sorteggio — <b>{0}</b>: {1} {2} ({3}).",'log.rolloff.tie':"<b>Parità</b>: si ripete il sorteggio.",'log.rolloff.win':"Sorteggio vinto da <b>{0}</b>: inizia lui.",'log.newgame':"Nuova partita iniziata. Benvenuti nel 윷놀이!",'log.turn':"Turno di <b>{0}</b>.",'log.roll':"<b>{0}</b> lancia {1} {2} ({3}).{4}",'log.extra':" Rilancia!",'log.capture':"<b>{0}</b> cattura {1} pedine! Rilancia.",'log.capture.one':"<b>{0}</b> cattura una pedina! Rilancia.",'log.group':"<b>{0}</b> raggruppa le pedine (업기).",'log.finish':"<b>{0}</b> fa uscire {1} pedine! ({2}/4)",'log.finish.one':"<b>{0}</b> fa uscire una pedina! ({2}/4)",'log.backhome':"<b>{0}</b> torna indietro (빽도) fino a casa.",'log.nomove':"<b>{0}</b>: nessuna mossa valida, tiri persi.",'header.diary':"Diario",'header.audio':"Audio",'header.menu':"Menu",'header.close':"Chiudi"},
+ko:{tagline:"윷놀이 · 한국의 전통 보드게임",'mode.pvp.title':"2인용",'mode.pvp.desc':"같은 기기에서 둘이서 플레이",'mode.cpu.title':"CPU 대전",'mode.cpu.desc':"컴퓨터와 대결하세요",'opt.backdo.title':"빽도 규칙",'opt.backdo.desc':"표시된 윷가락만 뒷면이면 1칸 뒤로",'opt.sound.title':"효과음",'opt.sound.desc':"합성 음향, 외부 파일 없음",'rules.summary':"📜 게임 방법",'rules.1':"윷가락 4개를 던지세요: <b>도 1</b>, <b>개 2</b>, <b>걸 3</b>, <b>윷 4</b>, <b>모 5칸</b>. 윷이나 모가 나오면 한 번 더 던집니다.",'rules.2':"4개의 말을 반시계 방향으로 돌아 출발점을 통과해 빼세요.",'rules.3':"상대 말 위에 멈추면 <b>잡습니다</b>(출발점으로) → 한 번 더. 내 말 위에 멈추면 <b>업고</b> 함께 갑니다.",'rules.4':"모서리나 중앙에 정확히 멈추면 <b>지름길</b>(대각선)을 탈 수 있습니다.",'rules.5':"4개의 말을 모두 빼면 이깁니다.",'setup.start':"▶ 게임 시작",brand:"",'panel.turn':"차례",'panel.sticks':"윷가락",'panel.pending':"사용할 윷",'panel.diary':"기록",'throw.btn':"🎲 윷 던지기",'result.again':"↑한 번 더",'hint.cpu':"CPU가 두는 중…",'hint.throw':"윷을 던지세요!",'hint.selectChip':"윷을 고른 뒤 말을 선택하세요.",'hint.selectPiece':"움직일 말을 선택하세요.",'player.1':"플레이어 1",'player.2':"플레이어 2",'player.cpu':"CPU",'win.title':"{0} 승리!",'win.subtitle':"4개의 말이 모두 코스를 통과했습니다. 잘했어요!",'win.rematch':"🔁 다시 하기",'win.menu':"☰ 메뉴",'log.rolloff':"선공 <b>결정</b>: 둘 다 던지고, 더 높은 족이 시작합니다.",'log.rolloff.throw':"선공 결정 — <b>{0}</b>: {1} {2} ({3}).",'log.rolloff.tie':"<b>동점</b>: 다시 던집니다.",'log.rolloff.win':"<b>{0}</b>이(가) 선공을 잡았습니다.",'log.newgame':"새 게임이 시작되었습니다. 윷놀이에 오신 것을 환영합니다!",'log.turn':"<b>{0}</b>의 차례.",'log.roll':"<b>{0}</b>이(가) {1} {2}({3})을(를) 던졌습니다.{4}",'log.extra':" 한 번 더!",'log.capture':"<b>{0}</b>이(가) {1}개를 잡았습니다! 한 번 더!",'log.capture.one':"<b>{0}</b>이(가) 말을 잡았습니다! 한 번 더!",'log.group':"<b>{0}</b>이(가) 말을 업었습니다(업기).",'log.finish':"<b>{0}</b>이(가) {1}개 말을 빼냈습니다! ({2}/4)",'log.finish.one':"<b>{0}</b>이(가) 말을 빼냈습니다! ({2}/4)",'log.backhome':"<b>{0}</b>이(가) 집으로 돌아갔습니다(빽도).",'log.nomove':"<b>{0}</b>: 둘 수가 없어 윷을 잃었습니다.",'header.diary':"기록",'header.audio':"소리",'header.menu':"메뉴",'header.close':"닫기"},
+zh:{tagline:"尤茨游戏 · 韩国传统桌面游戏",'mode.pvp.title':"双人对战",'mode.pvp.desc':"同一设备上两人对战",'mode.cpu.title':"对战电脑",'mode.cpu.desc':"挑战计算机",'opt.backdo.title':"后走规则(빽도)",'opt.backdo.desc':"仅标记木棒朝上时，棋子后退1步",'opt.sound.title':"音效",'opt.sound.desc':"合成音效，无外部文件",'rules.summary':"📜 游戏方法",'rules.1':"投掷4根木棒：<b>도 1</b>、<b>개 2</b>、<b>걸 3</b>、<b>윷 4</b>、<b>모 5步</b>。掷出윷或모可再投一次。",'rules.2':"将4枚棋子沿逆时针方向绕行并从起点退出。",'rules.3':"停在对手棋子上即可<b>吃子</b>(送回起点)并再投一次；停在自己棋子上则<b>叠放</b>同行。",'rules.4':"正好停在角落或中心时可走<b>对角捷径</b>。",'rules.5':"先将4枚棋子全部退出者获胜。",'setup.start':"▶ 开始游戏",brand:"尤茨",'panel.turn':"回合",'panel.sticks':"木棒",'panel.pending':"可用投数",'panel.diary':"日志",'throw.btn':"🎲 投掷木棒",'result.again':"↑再投一次",'hint.cpu':"电脑思考中…",'hint.throw':"请投掷木棒！",'hint.selectChip':"请先选择投数，再选棋子。",'hint.selectPiece':"请选择要移动的棋子。",'player.1':"玩家 1",'player.2':"玩家 2",'player.cpu':"电脑",'win.title':"{0} 获胜！",'win.subtitle':"4枚棋子全部完成绕行。做得好！",'win.rematch':"🔁 再来一局",'win.menu':"☰ 菜单",'log.rolloff':"<b>先手投掷</b>：双方各投一次，点数高者先行。",'log.rolloff.throw':"先手投掷 — <b>{0}</b>：{1} {2}（{3}）。",'log.rolloff.tie':"<b>平局</b>：重新投掷。",'log.rolloff.win':"<b>{0}</b>赢得先手。",'log.newgame':"新游戏开始。欢迎来到尤茨游戏！",'log.turn':"<b>{0}</b>的回合。",'log.roll':"<b>{0}</b>掷出{1} {2}({3})。{4}",'log.extra':" 再投一次！",'log.capture':"<b>{0}</b>吃掉{1}枚棋子！再投一次！",'log.capture.one':"<b>{0}</b>吃掉一枚棋子！再投一次！",'log.group':"<b>{0}</b>叠放棋子(업기)。",'log.finish':"<b>{0}</b>退出{1}枚棋子！({2}/4)",'log.finish.one':"<b>{0}</b>退出一枚棋子！({2}/4)",'log.backhome':"<b>{0}</b>后退回家(빽도)。",'log.nomove':"<b>{0}</b>：无有效走法，投数作废。",'header.diary':"日志",'header.audio':"声音",'header.menu':"菜单",'header.close':"关闭"},
+en:{tagline:"Yutnori · The traditional Korean board game",'mode.pvp.title':"2 Players",'mode.pvp.desc':"Play with a friend on the same device",'mode.cpu.title':"vs CPU",'mode.cpu.desc':"Challenge the computer",'opt.backdo.title':"Back-do rule (빽도)",'opt.backdo.desc':"If only the marked stick is flat, your piece moves 1 step backward",'opt.sound.title':"Sound effects",'opt.sound.desc':"Synthesized sounds, no external files",'rules.summary':"📜 How to play",'rules.1':"Throw the 4 sticks: <b>도 Do</b>=1, <b>개 Gae</b>=2, <b>걸 Geol</b>=3, <b>윷 Yut</b>=4, <b>모 Mo</b>=5 steps. Yut and Mo grant an extra throw.",'rules.2':"Move your 4 pieces counter-clockwise around the board and exit through the start.",'rules.3':"Land on an opponent's piece? <b>Capture</b> it (back to start) and throw again. Land on your own? They <b>stack</b> and move together.",'rules.4':"Landing exactly on a corner or the center lets you take the <b>diagonal shortcut</b>.",'rules.5':"First to get all 4 pieces out wins.",'setup.start':"▶ Start game",brand:"Yutnori",'panel.turn':"Turn",'panel.sticks':"Sticks",'panel.pending':"Pending throws",'panel.diary':"Log",'throw.btn':"🎲 Throw sticks",'result.again':"↑roll again",'hint.cpu':"CPU is thinking…",'hint.throw':"Throw the sticks!",'hint.selectChip':"Pick a throw value, then pick a piece.",'hint.selectPiece':"Pick a piece to move.",'player.1':"Player 1",'player.2':"Player 2",'player.cpu':"CPU",'win.title':"{0} wins!",'win.subtitle':"All 4 pieces have completed the course. 잘했어요!",'win.rematch':"🔁 Rematch",'win.menu':"☰ Menu",'log.rolloff':"<b>Roll-off</b> for the first player: both throw, highest starts.",'log.rolloff.throw':"Roll-off — <b>{0}</b>: {1} {2} ({3}).",'log.rolloff.tie':"<b>Tie</b>: throwing again.",'log.rolloff.win':"<b>{0}</b> wins the roll-off and starts.",'log.newgame':"New game started. Welcome to Yutnori!",'log.turn':"<b>{0}</b>'s turn.",'log.roll':"<b>{0}</b> threw {1} {2} ({3}).{4}",'log.extra':" Roll again!",'log.capture':"<b>{0}</b> captured {1} pieces! Roll again.",'log.capture.one':"<b>{0}</b> captured a piece! Roll again.",'log.group':"<b>{0}</b> stacked pieces (업기).",'log.finish':"<b>{0}</b> brought out {1} pieces! ({2}/4)",'log.finish.one':"<b>{0}</b> brought out a piece! ({2}/4)",'log.backhome':"<b>{0}</b> went back home (빽도).",'log.nomove':"<b>{0}</b>: no valid moves, throw lost.",'header.diary':"Log",'header.audio':"Sound",'header.menu':"Menu",'header.close':"Close"}
 },
 t(key,...a){const d=this.dict[this.cur]||this.dict.en;let s=d[key]||this.dict.en[key]||key;return s.replace(/\{(\d+)\}/g,(_,i)=>a[+i]??'');},
 setLang(l){this.cur=l;localStorage.setItem('yutnori_lang',l);applyLang();}
 };
 let lastResult=null;
+const THEME_I18N={
+it:{title:"Tema del tabellone",'modern.title':"✦ Modern",'modern.desc':"L'aspetto attuale",'traditional.title':"🪵 Traditional",'traditional.desc':"Carta e legno coreani",toggle:"Cambia tema del tabellone"},
+en:{title:"Board theme",'modern.title':"✦ Modern",'modern.desc':"The current look",'traditional.title':"🪵 Traditional",'traditional.desc':"Korean paper and wood",toggle:"Change board theme"},
+ko:{title:"게임판 테마",'modern.title':"✦ 모던",'modern.desc':"현재 스타일",'traditional.title':"🪵 전통",'traditional.desc':"한국 한지와 나무",toggle:"게임판 테마 변경"},
+zh:{title:"棋盘主题",'modern.title':"✦ 现代",'modern.desc':"当前外观",'traditional.title':"🪵 传统",'traditional.desc':"韩纸与木纹",toggle:"切换棋盘主题"}
+};
+const themeT=key=>(THEME_I18N[I18N.cur]||THEME_I18N.en)[key]||key;
+const START_I18N={
+it:{title:"Chi inizia",'p1.title':"🔴 Rosso",'p1.desc':"Muove per primo",'p2.title':"🔵 Blu",'p2.desc':"Il secondo giocatore (o la CPU)",'random.title':"🎲 Casuale",'random.desc':"Lo decidono i bastoncini",hint:"Sorteggio del primo giocatore…"},
+en:{title:"Who starts",'p1.title':"🔴 Red",'p1.desc':"Moves first",'p2.title':"🔵 Blue",'p2.desc':"The second player (or the CPU)",'random.title':"🎲 Random",'random.desc':"The sticks decide",hint:"Rolling off for the first player…"},
+ko:{title:"선공",'p1.title':"🔴 빨강",'p1.desc':"먼저 움직입니다",'p2.title':"🔵 파랑",'p2.desc':"두 번째 플레이어 (또는 CPU)",'random.title':"🎲 무작위",'random.desc':"윷가락으로 결정",hint:"선공을 결정하는 중…"},
+zh:{title:"谁先行",'p1.title':"🔴 红方",'p1.desc':"先走",'p2.title':"🔵 蓝方",'p2.desc':"第二位玩家（或电脑）",'random.title':"🎲 随机",'random.desc':"由掷签决定",hint:"正在决定先手…"}
+};
+const startT=key=>(START_I18N[I18N.cur]||START_I18N.en)[key]||key;
+const FINISH_RULE_I18N={it:"Arrivare alla casella finale non basta: serve un passo ulteriore per uscire dal circuito.",en:"Reaching the final square is not enough: one further step is required to leave the course.",ko:"마지막 칸에 도착해도 끝이 아닙니다. 한 칸을 더 이동해 코스를 벗어나야 합니다.",zh:"到达最后一格并不算完成；还需再走一步离开赛道。"};
+const CPU_I18N={
+it:{title:"Difficoltà CPU",'easy.title':"🙂 Facile",'easy.desc':"Scelte più casuali",'normal.title':"🧠 Normale",'normal.desc':"Strategia equilibrata",'hard.title':"🔥 Difficile",'hard.desc':"Più aggressiva e prudente"},
+en:{title:"CPU difficulty",'easy.title':"🙂 Easy",'easy.desc':"More random choices",'normal.title':"🧠 Normal",'normal.desc':"Balanced strategy",'hard.title':"🔥 Hard",'hard.desc':"More aggressive and cautious"},
+ko:{title:"CPU 난이도",'easy.title':"🙂 쉬움",'easy.desc':"더 무작위적인 선택",'normal.title':"🧠 보통",'normal.desc':"균형 잡힌 전략",'hard.title':"🔥 어려움",'hard.desc':"더 공격적이고 신중함"},
+zh:{title:"电脑难度",'easy.title':"🙂 简单",'easy.desc':"更多随机选择",'normal.title':"🧠 普通",'normal.desc':"平衡的策略",'hard.title':"🔥 困难",'hard.desc':"更主动且谨慎"}
+};
+const cpuT=key=>(CPU_I18N[I18N.cur]||CPU_I18N.en)[key]||key;
+const STATS_I18N={
+it:{title:"Statistiche partita",rolls:"Tiri",avg:"Media tiro",bonus:"Yut + Mo",backdo:"Back-do",moves:"Mosse",steps:"Passi avanti",branches:"Bivi scelti",captures:"Pedine catturate",groups:"Raggruppamenti",maxStack:"Gruppo massimo",momentum:"Andamento della partita",mTurn:"Turno",mLead:"Vantaggio",mEven:"Equilibrio",mCapture:"Cattura",mFinish:"Uscita",mShort:"Partita troppo breve per tracciare l'andamento",mSummary:"Barre verso l'alto quando è in vantaggio {0}, verso il basso quando è in vantaggio {1}."},
+en:{title:"Match statistics",rolls:"Throws",avg:"Average throw",bonus:"Yut + Mo",backdo:"Back-do",moves:"Moves",steps:"Forward steps",branches:"Branches chosen",captures:"Pieces captured",groups:"Stacks formed",maxStack:"Largest stack",momentum:"Match momentum",mTurn:"Turn",mLead:"Lead",mEven:"Even",mCapture:"Capture",mFinish:"Piece out",mShort:"Match too short to chart the momentum",mSummary:"Bars point up while {0} leads and down while {1} leads."},
+ko:{title:"경기 통계",rolls:"던진 횟수",avg:"평균 이동",bonus:"윷 + 모",backdo:"빽도",moves:"이동 횟수",steps:"전진 칸수",branches:"갈림길 선택",captures:"잡은 말",groups:"업기",maxStack:"최대 묶음",momentum:"경기 흐름",mTurn:"차례",mLead:"우세",mEven:"균형",mCapture:"잡기",mFinish:"완주",mShort:"차례가 너무 적어 흐름을 그릴 수 없습니다",mSummary:"{0}이(가) 우세하면 위쪽, {1}이(가) 우세하면 아래쪽 막대입니다."},
+zh:{title:"对局统计",rolls:"投掷次数",avg:"平均点数",bonus:"윷 + 모",backdo:"后走",moves:"移动次数",steps:"前进步数",branches:"路径选择",captures:"吃掉棋子",groups:"叠放次数",maxStack:"最大叠放",momentum:"局势走向",mTurn:"回合",mLead:"领先",mEven:"均势",mCapture:"吃子",mFinish:"出局",mShort:"回合太少，无法绘制局势走向",mSummary:"{0}领先时柱形向上，{1}领先时柱形向下。"}
+};
+const statsT=key=>(STATS_I18N[I18N.cur]||STATS_I18N.en)[key]||key;
+const statsF=(key,...a)=>statsT(key).replace(/\{(\d+)\}/g,(_,i)=>a[+i]??'');
 function applyLang(){
 QA('[data-i18n]').forEach(e=>e.textContent=I18N.t(e.dataset.i18n));
 QA('[data-i18n-html]').forEach(e=>e.innerHTML=I18N.t(e.dataset.i18nHtml));
 QA('[data-i18n-tt]').forEach(e=>e.title=I18N.t(e.dataset.i18nTt));
+QA('[data-cpu-i18n]').forEach(e=>e.textContent=cpuT(e.dataset.cpuI18n));
+QA('[data-theme-i18n]').forEach(e=>e.textContent=themeT(e.dataset.themeI18n));
+QA('[data-start-i18n]').forEach(e=>e.textContent=startT(e.dataset.startI18n));
+QA('[data-finish-i18n]').forEach(e=>e.textContent=FINISH_RULE_I18N[I18N.cur]||FINISH_RULE_I18N.en);
+const themeButton=$('#themeBtn');if(themeButton)themeButton.title=themeT('toggle');
 $('#logClose').title=I18N.t('header.close');
 PLAYERS[0].name=I18N.t('player.1');PLAYERS[1].name=(G&&G.opts.vsCPU)?I18N.t('player.cpu'):I18N.t('player.2');
 QA('.lang-switch button').forEach(b=>b.classList.toggle('sel',b.dataset.lang===I18N.cur));
 if(G)renderAll();
+if(G&&G.over)renderMatchStats();
 if(lastResult)setResultLabel(lastResult);
 }
 
@@ -308,77 +407,140 @@ NODES[23]=lerp(C,NODES[15],1/3);NODES[24]=lerp(C,NODES[15],2/3);
 NODES[25]=lerp(NODES[10],C,1/3);NODES[26]=lerp(NODES[10],C,2/3);
 NODES[27]=lerp(C,NODES[0],1/3);NODES[28]=lerp(C,NODES[0],2/3);
 const SPECIAL=new Set([0,5,10,15,22]);
-const HOME=-1,FIN=99;
+const HOME=-1;
+const RESERVE_ZONES=[{x:300,y:500},{x:700,y:500}];
+const RESERVE_SLOT_DY=[-75,-25,25,75];
 const EDGES=[];
 for(let i=0;i<20;i++)EDGES.push([i,(i+1)%20]);
 EDGES.push([5,20],[20,21],[21,22],[22,23],[23,24],[24,15],[10,25],[25,26],[26,22],[22,27],[27,28],[28,0]);
 const DIAG_A=new Set([5,20,21,22,23,24,15]);
 const PLAYERS=[{name:I18N.t('player.1'),color:'#ff5a6e',css:'p1'},{name:I18N.t('player.2'),color:'#3ec6ff',css:'p2'}];
 let G;
-function rollSticks(bd){const ups=[0,1,2,3].map(()=>Math.random()<.5);const n=ups.filter(Boolean).length;
+const FLAT_P=.55;
+function rollSticks(bd){const ups=[0,1,2,3].map(()=>Math.random()<FLAT_P);const n=ups.filter(Boolean).length;
 if(n===0)return{ups,key:'mo',kr:'모',name:'Mo',val:5,extra:true};
 if(n===4)return{ups,key:'yut',kr:'윷',name:'Yut',val:4,extra:true};
 if(n===3)return{ups,key:'geol',kr:'걸',name:'Geol',val:3,extra:false};
 if(n===2)return{ups,key:'gae',kr:'개',name:'Gae',val:2,extra:false};
 if(bd&&ups[0])return{ups,key:'backdo',kr:'빽도',name:'Back-do',val:-1,extra:false};
 return{ups,key:'do',kr:'도',name:'Do',val:1,extra:false};}
-function firstStepOf(n){if(n===5)return 20;if(n===10)return 25;switch(n){case 20:return 21;case 21:return 22;case 23:return 24;case 24:return 15;case 25:return 26;case 26:return 22;case 27:return 28;case 28:return 0;default:return(n+1)%20;}}
+function firstStepsOf(n){if(n===5)return[6,20];if(n===10)return[11,25];switch(n){case 20:return[21];case 21:return[22];case 23:return[24];case 24:return[15];case 25:return[26];case 26:return[22];case 27:return[28];case 28:return[0];default:return[(n+1)%20];}}
 function stepMid(c,p){if(c===22)return p===26?27:23;if(c===5)return 6;if(c===10)return 11;switch(c){case 20:return 21;case 21:return 22;case 23:return 24;case 24:return 15;case 25:return 26;case 26:return 22;case 27:return 28;case 28:return 0;default:return(c+1)%20;}}
-function simulate(start,steps){const out=[];const fo=start===22?[23,27]:(start===HOME?[1]:[firstStepOf(start)]);for(const first of fo){const path=[first];let cur=first,prev=start,fin=false;if(first===0&&prev!==HOME)fin=true;else{for(let s=1;s<steps&&!fin;s++){const nx=stepMid(cur,prev);prev=cur;cur=nx;path.push(cur);if(cur===0)fin=true;}}out.push({path,finish:fin});}return out;}
-function backDest(h){if(!h||h.length===0)return null;if(h.length===1)return{path:[HOME],toHome:true};return{path:[h[h.length-2]],back:true};}
-function newGame(opts){PLAYERS[1].name=opts.vsCPU?I18N.t('player.cpu'):I18N.t('player.2');G={opts,homeCount:[4,4],finished:[0,0],stacks:[],nextSid:1,turn:0,pending:[],throwsLeft:1,phase:'awaitThrow',selChip:null,busy:false,over:false,_cpu:false};}
+function simulate(start,steps,dist){const D=dist||0;if(start===0&&D>=LAP)return[{path:[0],finish:true}];const out=[];const fo=start===22?[23,27]:(start===HOME?[1]:firstStepsOf(start));for(const first of fo){const path=[first];let cur=first,prev=start,fin=false;for(let s=1;s<steps&&!fin;s++){if(cur===0&&D+s>=LAP){fin=true;break;}const nx=stepMid(cur,prev);prev=cur;cur=nx;path.push(cur);}out.push({path,finish:fin});}return out;}
+function backMoves(node){if(node===22)return[{path:[21],back:true},{path:[26],back:true}];switch(node){case 20:return[{path:[5],back:true}];case 21:return[{path:[20],back:true}];case 23:return[{path:[22],back:true}];case 24:return[{path:[23],back:true}];case 25:return[{path:[10],back:true}];case 26:return[{path:[25],back:true}];case 27:return[{path:[22],back:true}];case 28:return[{path:[27],back:true}];default:return[{path:[(node+19)%20],back:true}];}}
+function makeStats(){return{rolls:0,rollTotal:0,bonus:0,backdo:0,moves:0,forwardSteps:0,branches:0,captures:0,groups:0,maxStack:1};}
+const SUCC=n=>n===HOME?[1]:n===22?[23,27]:firstStepsOf(n);
+const MOM_NODES=[HOME];for(let i=0;i<29;i++)MOM_NODES.push(i);
+const REM={0:1},TRV={};TRV[HOME]=0;
+for(let pass=0;pass<40;pass++){for(const n of MOM_NODES){if(n!==0){let b=Infinity;for(const s of SUCC(n)){if(REM[s]!==undefined)b=Math.min(b,REM[s]+1);}if(b<Infinity)REM[n]=b;}if(TRV[n]!==undefined)for(const s of SUCC(n)){if(TRV[s]===undefined||TRV[n]+1<TRV[s])TRV[s]=TRV[n]+1;}}}
+const nodeProgress=n=>n===HOME?0:TRV[n]/(TRV[n]+REM[n]);
+const LAP=TRV[0];
+function advantage(pl){let v=G.finished[pl];for(const s of G.stacks)if(s.player===pl)v+=s.count*Math.max(0,Math.min(nodeProgress(s.node),(s.dist||0)/LAP));return v;}
+function newTurnEv(){return{cap:[0,0],fin:[0,0]};}
+function pushMomentum(){const a=advantage(0),b=advantage(1);G.momentum.push({by:G.turn,p1:a,p2:b,d:a-b,cap:G.turnEv.cap.slice(),fin:G.turnEv.fin.slice()});G.turnEv=newTurnEv();}
+function newGame(opts){PLAYERS[1].name=opts.vsCPU?I18N.t('player.cpu'):I18N.t('player.2');G={opts,homeCount:[4,4],finished:[0,0],stacks:[],nextSid:1,turn:opts.starter==='p2'?1:0,pending:[],throwsLeft:1,phase:'awaitThrow',selChip:null,busy:false,over:false,_cpu:false,stats:[makeStats(),makeStats()],momentum:[],turnEv:newTurnEv()};}
 function stacksOf(pl){return G.stacks.filter(s=>s.player===pl);}
 function stackAt(node){return G.stacks.find(s=>s.node===node);}
-function movesForValue(pl,val){const out=[];if(val>0&&G.homeCount[pl]>0){for(const r of simulate(HOME,val))out.push({source:'home',player:pl,val,path:r.path,finish:r.finish,toHome:false});}for(const s of stacksOf(pl)){if(val===-1){const bd=backDest(s.history);if(bd)out.push({source:s.id,player:pl,val,path:bd.path,finish:false,toHome:!!bd.toHome,back:true});}else{for(const r of simulate(s.node,val))out.push({source:s.id,player:pl,val,path:r.path,finish:r.finish,toHome:false});}}return out;}
+function movesForValue(pl,val){const out=[];if(val>0&&G.homeCount[pl]>0){for(const r of simulate(HOME,val,0))out.push({source:'home',player:pl,val,path:r.path,finish:r.finish,toHome:false});}for(const s of stacksOf(pl)){if(val===-1){for(const bd of backMoves(s.node))out.push({source:s.id,player:pl,val,path:bd.path,finish:false,toHome:!!bd.toHome,back:true});}else{for(const r of simulate(s.node,val,s.dist))out.push({source:s.id,player:pl,val,path:r.path,finish:r.finish,toHome:false});}}return out;}
 function anyLegalMove(pl){return G.pending.some(p=>movesForValue(pl,p.val).length>0);}
 function removeStack(s){const i=G.stacks.indexOf(s);if(i>=0)G.stacks.splice(i,1);}
-function applyMove(m){const pl=m.player,ev={capture:0,group:false,finish:0};let st;if(m.source==='home'){G.homeCount[pl]--;st={id:G.nextSid++,player:pl,node:HOME,history:[],count:1};G.stacks.push(st);}else st=G.stacks.find(s=>s.id===m.source);
+function applyMove(m){const pl=m.player,ev={capture:0,group:false,groupSize:0,finish:0};let st;if(m.source==='home'){G.homeCount[pl]--;st={id:G.nextSid++,player:pl,node:HOME,count:1,dist:0};G.stacks.push(st);}else st=G.stacks.find(s=>s.id===m.source);
 if(m.toHome){G.homeCount[pl]+=st.count;removeStack(st);ev.toHome=true;return ev;}
 if(m.finish){G.finished[pl]+=st.count;ev.finish=st.count;removeStack(st);return ev;}
 const dest=m.path[m.path.length-1];const en=stackAt(dest);if(en&&en.player!==pl){G.homeCount[en.player]+=en.count;ev.capture=en.count;removeStack(en);}
-if(m.back){st.history.pop();st.node=dest;}else{const base=(m.source==='home')?[0]:st.history.slice();st.history=base.concat(m.path);st.node=dest;}
-const ally=G.stacks.find(s=>s.node===dest&&s.player===pl&&s!==st);if(ally){ally.count+=st.count;ally.history=st.history.slice();removeStack(st);ev.group=true;}return ev;}
+st.node=dest;st.dist=(st.dist||0)+(m.back?-1:m.path.length);
+const ally=G.stacks.find(s=>s.node===dest&&s.player===pl&&s!==st);if(ally){ally.count+=st.count;ally.dist=Math.min(ally.dist||0,st.dist);ev.groupSize=ally.count;removeStack(st);ev.group=true;}return ev;}
+function recordMove(m,ev){const s=G.stats[m.player];s.moves++;if(!m.back)s.forwardSteps+=m.path.length;if([20,25,23,27].includes(m.path[0]))s.branches++;s.captures+=ev.capture;if(ev.group){s.groups++;s.maxStack=Math.max(s.maxStack,ev.groupSize);}}
 let board,pieceLayer,hlLayer,choiceMoves=null;
 function buildBoard(){board=$('#board');board.innerHTML='';const defs=el('defs',{},board);
-[['p1','#ff7a8a','#b53149'],['p2','#5fd4ff','#1b6f9e']].forEach(([id,c1,c2])=>{const g=el('radialGradient',{id:'g'+id,cx:'35%',cy:'30%',r:'70%'},defs);el('stop',{offset:'0%','stop-color':c1},g);el('stop',{offset:'100%','stop-color':c2},g);});
+[['p1','var(--p1)','var(--p1d)'],['p2','var(--p2)','var(--p2d)']].forEach(([id,c1,c2])=>{const g=el('radialGradient',{id:'g'+id,cx:'35%',cy:'30%',r:'70%'},defs);el('stop',{offset:'0%','stop-color':c1},g);el('stop',{offset:'100%','stop-color':c2},g);});
 const eg=el('g',{},board);EDGES.forEach(([a,b])=>el('line',{x1:NODES[a].x,y1:NODES[a].y,x2:NODES[b].x,y2:NODES[b].y,class:'edge'+(DIAG_A.has(a)?' diag':'')},eg));
-NODES.forEach((n,i)=>{const r=SPECIAL.has(i)?42:30;el('circle',{cx:n.x,cy:n.y,r,class:'node-bg'+(SPECIAL.has(i)?' special':'')},board);if(i===0){const t=el('text',{x:n.x,y:n.y,class:'lbl',fill:'#ffd166'},board);t.textContent='출발';}});
+RESERVE_ZONES.forEach(z=>RESERVE_SLOT_DY.forEach(dy=>el('circle',{cx:z.x,cy:z.y+dy,r:22,class:'reserve-slot'},board)));
+NODES.forEach((n,i)=>{const r=SPECIAL.has(i)?42:30;el('circle',{cx:n.x,cy:n.y,r,class:'node-bg'+(SPECIAL.has(i)?' special':'')},board);if(i===0){const t=el('text',{x:n.x,y:n.y,class:'lbl',fill:'var(--gold)'},board);t.textContent='출발';}});
 pieceLayer=el('g',{id:'pieceLayer'},board);hlLayer=el('g',{id:'hlLayer'},board);}
 function clusterOffsets(n){if(n===1)return[{x:0,y:0}];if(n===2)return[{x:-9,y:0},{x:9,y:0}];if(n===3)return[{x:0,y:-10},{x:-10,y:8},{x:10,y:8}];return[{x:-8,y:-8},{x:8,y:-8},{x:-8,y:8},{x:8,y:8}];}
 function makePieceEl(pl,count,pos){const g=document.createElementNS(SVGNS,'g');g.setAttribute('class','piece '+PLAYERS[pl].css);g.style.transform='translate('+(pos?pos.x:0)+'px,'+(pos?pos.y:0)+'px)';const offs=clusterOffsets(Math.min(count,4));offs.forEach(o=>{el('circle',{cx:o.x,cy:o.y,r:16,fill:'url(#g'+PLAYERS[pl].css+')'},g);});el('circle',{r:20,class:'ring'},g);if(count>1){const t=el('text',{x:15,y:-15,class:'lbl',fill:'#fff'},g);t.textContent='×'+count;}return g;}
 function isMovableSource(sid){if(G.phase!=='awaitMove'||G.busy||G.over)return false;if(G.turn===1&&G.opts.vsCPU)return false;const ci=G.selChip??(G.pending.length===1?0:null);if(ci===null)return false;const val=G.pending[ci].val;return movesForValue(G.turn,val).some(m=>m.source===sid);}
-function renderPieces(){if(!pieceLayer)return;pieceLayer.querySelectorAll('.home-cluster').forEach(e=>e.remove());const existing={};pieceLayer.querySelectorAll('g[data-sid]').forEach(e=>existing[e.dataset.sid]=e);G.stacks.forEach(s=>{const n=NODES[s.node];if(!n)return;let g=existing[s.id];delete existing[s.id];if(!g){g=makePieceEl(s.player,s.count,n);g.dataset.sid=s.id;pieceLayer.appendChild(g);}g.style.transform='translate('+n.x+'px,'+n.y+'px)';const t=g.querySelector('text');if(s.count>1){if(!t){const tx=el('text',{x:15,y:-15,class:'lbl',fill:'#fff'},g);tx.textContent='×'+s.count;}else t.textContent='×'+s.count;}else if(t)t.remove();const mv=isMovableSource(s.id);g.classList.toggle('movable',mv);g.onclick=mv?()=>onPieceClick(s):null;});Object.values(existing).forEach(e=>e.remove());const start=NODES[0];PLAYERS.forEach((p,pi)=>{const hc=G.homeCount[pi];if(hc<=0)return;const g=document.createElementNS(SVGNS,'g');g.setAttribute('class','piece home-cluster '+p.css);const ox=pi===0?-18:18,oy=pi===0?-10:10;g.style.transform='translate('+(start.x+ox)+'px,'+(start.y+oy)+'px)';for(let k=0;k<hc;k++){const cx=(k-(hc-1)/2)*16;el('circle',{cx,cy:0,r:9,fill:'url(#g'+p.css+')'},g);el('circle',{cx,cy:0,r:10,class:'ring'},g);}const can=pi===G.turn&&isMovableSource('home');g.classList.toggle('movable',can);g.onclick=can?()=>onPieceClick('home'):null;pieceLayer.appendChild(g);});}
+function renderPieces(){if(!pieceLayer)return;pieceLayer.querySelectorAll('.home-cluster').forEach(e=>e.remove());const existing={};pieceLayer.querySelectorAll('g[data-sid]').forEach(e=>existing[e.dataset.sid]=e);G.stacks.forEach(s=>{const n=NODES[s.node];if(!n)return;let g=existing[s.id];delete existing[s.id];if(!g){g=makePieceEl(s.player,s.count,n);g.dataset.sid=s.id;pieceLayer.appendChild(g);}g.style.transform='translate('+n.x+'px,'+n.y+'px)';const t=g.querySelector('text');if(s.count>1){if(!t){const tx=el('text',{x:15,y:-15,class:'lbl',fill:'#fff'},g);tx.textContent='×'+s.count;}else t.textContent='×'+s.count;}else if(t)t.remove();const mv=isMovableSource(s.id);g.classList.toggle('movable',mv);g.onclick=mv?()=>onPieceClick(s):null;});Object.values(existing).forEach(e=>e.remove());PLAYERS.forEach((p,pi)=>{const hc=G.homeCount[pi];if(hc>0){const g=document.createElementNS(SVGNS,'g');g.setAttribute('class','piece home-cluster '+p.css);const z=RESERVE_ZONES[pi];g.style.transform='translate('+z.x+'px,'+z.y+'px)';for(let k=0;k<hc;k++){const cy=RESERVE_SLOT_DY[k],sg=el('g',{'data-rslot':k},g);el('circle',{cx:0,cy,r:16,fill:'url(#g'+p.css+')'},sg);el('circle',{cx:0,cy,r:20,class:'ring'},sg);}const can=pi===G.turn&&isMovableSource('home');g.classList.toggle('movable',can);g.onclick=can?()=>onPieceClick('home'):null;pieceLayer.appendChild(g);}});}
 function renderChips(){const c=$('#chips');c.innerHTML='';G.pending.forEach((p,i)=>{const b=document.createElement('button');b.className='chip'+(p.val===-1?' back':'')+(i===G.selChip?' sel':'');b.textContent=p.kr+' '+(p.val>0?p.val:'-1');b.onclick=()=>{if(G.busy||G.over)return;if(G.turn===1&&G.opts.vsCPU)return;AudioFX.click();G.selChip=(G.selChip===i?null:i);clearHighlights();renderChips();renderPieces();updateHint();};c.appendChild(b);});}
-function renderStatus(){const box=$('#playersStatus');box.innerHTML='';PLAYERS.forEach((p,i)=>{const home=G.homeCount[i],done=G.finished[i],onBoard=4-home-done;const row=document.createElement('div');row.className='pstat';row.style.color=p.color;const nm=document.createElement('span');nm.className='nm';nm.style.color=p.color;nm.textContent=p.name;row.appendChild(nm);const dots=document.createElement('div');dots.className='dots';for(let k=0;k<4;k++){const d=document.createElement('div');d.className='dot';if(k<done)d.classList.add('done');else if(k>=done+onBoard)d.classList.add('home');const canHome=(k>=done+onBoard)&&i===G.turn&&G.phase==='awaitMove'&&!G.busy&&!(G.opts.vsCPU&&G.turn===1);if(canHome){const ci=G.selChip??(G.pending.length===1?0:null);const val=ci!==null?G.pending[ci].val:null;if(val>0&&G.homeCount[i]>0)d.onclick=()=>onPieceClick('home');}dots.appendChild(d);}row.appendChild(dots);box.appendChild(row);});}
+function renderStatus(){const box=$('#playersStatus');box.innerHTML='';PLAYERS.forEach((p,i)=>{const home=G.homeCount[i],done=G.finished[i],onBoard=4-home-done;const row=document.createElement('div');row.className='pstat';row.style.color=p.color;const nm=document.createElement('span');nm.className='nm';nm.style.color=p.color;nm.textContent=p.name;row.appendChild(nm);const dots=document.createElement('div');dots.className='dots';for(let k=0;k<4;k++){const d=document.createElement('div');d.className='dot';d.dataset.p=i;d.dataset.k=k;if(k<done)d.classList.add('done');else if(k>=done+onBoard)d.classList.add('home');const canHome=(k>=done+onBoard)&&i===G.turn&&G.phase==='awaitMove'&&!G.busy&&!(G.opts.vsCPU&&G.turn===1);if(canHome){const ci=G.selChip??(G.pending.length===1?0:null);const val=ci!==null?G.pending[ci].val:null;if(val>0&&G.homeCount[i]>0)d.onclick=()=>onPieceClick('home');}dots.appendChild(d);}row.appendChild(dots);box.appendChild(row);});}
 function renderTurn(){const p=PLAYERS[G.turn];$('#turnBadge').innerHTML='<span class="turn-dot" style="background:'+p.color+'"></span> <span style="color:'+p.color+'">'+p.name+'</span>';}
-function updateHint(){const h=$('#hint');if(G.over){h.textContent='';return;}if(G.opts.vsCPU&&G.turn===1){h.textContent=I18N.t('hint.cpu');return;}if(G.phase==='awaitThrow'||(G.phase==='awaitMove'&&G.pending.length===0))h.textContent=I18N.t('hint.throw');else if(G.phase==='awaitMove'){if(G.selChip===null&&G.pending.length>1)h.textContent=I18N.t('hint.selectChip');else h.textContent=I18N.t('hint.selectPiece');}else h.textContent='';}
+function updateHint(){const h=$('#hint');if(G.over){h.textContent='';return;}if(G.phase==='rolloff'){h.textContent=startT('hint');return;}if(G.opts.vsCPU&&G.turn===1){h.textContent=I18N.t('hint.cpu');return;}if(G.phase==='awaitThrow'||(G.phase==='awaitMove'&&G.pending.length===0))h.textContent=I18N.t('hint.throw');else if(G.phase==='awaitMove'){if(G.selChip===null&&G.pending.length>1)h.textContent=I18N.t('hint.selectChip');else h.textContent=I18N.t('hint.selectPiece');}else h.textContent='';}
 function updateThrowBtn(){const b=$('#throwBtn');b.disabled=!(G.throwsLeft>0&&!G.busy&&!G.over&&G.phase!=='animating'&&!(G.opts.vsCPU&&G.turn===1));}
 function log(msg,cls){const l=$('#log');const r=document.createElement('div');r.className='row'+(cls?' '+cls:'');r.innerHTML=msg;l.prepend(r);while(l.children.length>40)l.lastChild.remove();const lb=$('#logBtn');if(lb){lb.classList.remove('pulse');void lb.offsetWidth;lb.classList.add('pulse');}}
 function renderAll(){renderTurn();renderPieces();renderChips();renderStatus();updateHint();updateThrowBtn();}
+function momLegendItem(color,label,ev){const s=document.createElement('span');const i=document.createElement('i');if(ev)i.className='ev';i.style.background=color;s.append(i,document.createTextNode(label));return s;}
+function renderMomentum(root){const box=document.createElement('div');box.className='momentum';const head=document.createElement('div');head.className='mom-head';const h=document.createElement('h4');h.textContent=statsT('momentum');head.appendChild(h);const lg=document.createElement('div');lg.className='mom-legend';PLAYERS.forEach((p,i)=>lg.appendChild(momLegendItem('var(--'+p.css+')',p.name+' '+(i===0?'↑':'↓'))));lg.appendChild(momLegendItem('var(--gold)',statsT('mCapture'),true));lg.appendChild(momLegendItem('var(--good)',statsT('mFinish'),true));head.appendChild(lg);box.appendChild(head);
+const data=G.momentum||[];const note=document.createElement('p');note.className='mom-note';
+if(data.length<3){note.textContent=statsT('mShort');box.appendChild(note);root.appendChild(box);return;}
+const nf=new Intl.NumberFormat(I18N.cur,{maximumFractionDigits:1});
+const W=680,H=190,padL=40,padR=12,padT=16,padB=22,x0=padL,x1=W-padR,y0=padT,y1=H-padB,mid=(y0+y1)/2,half=(y1-y0)/2,plotW=x1-x0;
+const maxAbs=Math.max(.5,Math.ceil(Math.max.apply(null,data.map(s=>Math.abs(s.d)))*2)/2);
+const evCount=s=>(s.cap[0]+s.cap[1]>0?1:0)+(s.fin[0]+s.fin[1]>0?1:0),maxEv=Math.max.apply(null,data.map(evCount));
+const span=half-(maxEv?4+9*maxEv:4),R2=v=>Math.round(v*100)/100,Y=d=>mid-(d/maxAbs)*span;
+const wrap=document.createElement('div');wrap.className='mom-wrap';const svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img'},wrap);
+const last=data[data.length-1],lead=d=>Math.abs(d)<.05?statsT('mEven'):statsT('mLead')+' '+PLAYERS[d>0?0:1].name+' '+nf.format(Math.abs(d));
+svg.setAttribute('aria-label',statsT('momentum')+'. '+statsF('mSummary',PLAYERS[0].name,PLAYERS[1].name)+' '+statsT('mTurn')+' 1–'+data.length+'. '+lead(last.d)+'.');
+[maxAbs/2,-maxAbs/2].forEach(v=>el('line',{x1:x0,x2:x1,y1:Y(v),y2:Y(v),stroke:'var(--panel-bd)','stroke-width':1},svg));
+[[maxAbs/2,nf.format(maxAbs/2)],[0,'0'],[-maxAbs/2,nf.format(maxAbs/2)]].forEach(([v,t])=>{const tx=el('text',{x:x0-7,y:Y(v),'text-anchor':'end','dominant-baseline':'central',fill:'var(--mut)','font-size':10},svg);tx.textContent=t;});
+el('line',{x1:x0,x2:x1,y1:mid,y2:mid,stroke:'var(--mut)','stroke-width':1.5,opacity:.55},svg);
+const band=plotW/data.length,barW=Math.min(24,Math.max(3,band-2));const tip=document.createElement('div');tip.className='mom-tip hidden';
+data.forEach((s,i)=>{const cx=R2(x0+band*(i+.5)),up=s.d>=0,ty=R2(Y(s.d)),hgt=Math.abs(mid-ty);
+if(hgt>=.8){const a=R2(cx-barW/2),b=R2(cx+barW/2),r=R2(Math.min(4,barW/2,hgt)),k=up?r:-r;el('path',{d:'M'+a+','+mid+'L'+a+','+R2(ty+k)+'Q'+a+','+ty+' '+R2(a+r)+','+ty+'L'+R2(b-r)+','+ty+'Q'+b+','+ty+' '+b+','+R2(ty+k)+'L'+b+','+mid+'Z',fill:'var(--'+PLAYERS[up?0:1].css+')'},svg);}
+const evs=[];if(s.cap[0]+s.cap[1]>0)evs.push('var(--gold)');if(s.fin[0]+s.fin[1]>0)evs.push('var(--good)');
+evs.forEach((c,k)=>el('circle',{cx,cy:R2(up?Math.max(y0+4,ty-9-k*9):Math.min(y1-4,ty+9+k*9)),r:4,fill:c,stroke:'var(--panel)','stroke-width':1.5},svg));
+if(i===0||i===data.length-1||(i+1)%5===0){const t=el('text',{x:cx,y:y1+13,'text-anchor':'middle',fill:'var(--mut)','font-size':10},svg);t.textContent=i+1;}
+const hit=el('rect',{x:R2(cx-band/2),y:y0,width:R2(band),height:y1-y0,fill:'transparent'},svg);
+const show=()=>{const cp=s.cap[0]+s.cap[1],fn=s.fin[0]+s.fin[1],ratio=(wrap.clientWidth||W)/W;let html='<b>'+statsT('mTurn')+' '+(i+1)+'</b><br>'+lead(s.d);if(cp)html+='<br>'+statsT('mCapture')+' ×'+cp;if(fn)html+='<br>'+statsT('mFinish')+' ×'+fn;tip.innerHTML=html;tip.classList.remove('hidden');tip.style.left=Math.min(Math.max(cx*ratio,62),Math.max(62,(wrap.clientWidth||W)-62))+'px';tip.style.top=Math.max((up?ty:mid)*ratio-8,20)+'px';};
+hit.addEventListener('pointerenter',show);hit.addEventListener('pointerdown',show);});
+svg.addEventListener('pointerleave',()=>tip.classList.add('hidden'));
+wrap.appendChild(tip);box.appendChild(wrap);note.textContent=statsF('mSummary',PLAYERS[0].name,PLAYERS[1].name);box.appendChild(note);root.appendChild(box);}
+function renderMatchStats(){const root=$('#matchStats');if(!root||!G)return;root.innerHTML='';const title=document.createElement('h3');title.textContent=statsT('title');root.appendChild(title);renderMomentum(root);const players=document.createElement('div');players.className='stats-players';G.stats.forEach((s,i)=>{const card=document.createElement('section');card.className='stats-player';const name=document.createElement('h4');const dot=document.createElement('i');dot.style.background=PLAYERS[i].color;name.append(dot,document.createTextNode(PLAYERS[i].name));card.appendChild(name);const grid=document.createElement('div');grid.className='stats-grid';const avg=s.rolls?new Intl.NumberFormat(I18N.cur,{maximumFractionDigits:1}).format(s.rollTotal/s.rolls):'—';const values=[['rolls',s.rolls],['avg',avg],['bonus',s.bonus],['backdo',s.backdo],['moves',s.moves],['steps',s.forwardSteps],['branches',s.branches],['captures',s.captures],['groups',s.groups],['maxStack','×'+s.maxStack]];values.forEach(([key,value])=>{const item=document.createElement('div');item.className='stat';const number=document.createElement('b');number.textContent=value;const label=document.createElement('span');label.textContent=statsT(key);item.append(number,label);grid.appendChild(item);});card.appendChild(grid);players.appendChild(card);});root.appendChild(players);}
 function clearHighlights(){if(hlLayer)hlLayer.innerHTML='';choiceMoves=null;}
 function nodeScreenPos(node){const svg=$('#board').getBoundingClientRect();const fx=$('#fxlayer').getBoundingClientRect();const n=NODES[node];if(!n)return null;return{x:(n.x/1000)*svg.width+(svg.left-fx.left),y:(n.y/1000)*svg.height+(svg.top-fx.top)};}
 function burst(node,color){const wrap=$('#fxlayer');if(!wrap)return;const pos=nodeScreenPos(node);if(!pos)return;for(let i=0;i<18;i++){const p=document.createElement('div');p.className='particle';p.style.left=pos.x+'px';p.style.top=pos.y+'px';p.style.background=i%2?color:PLAYERS[G.turn].color;p.style.borderRadius='50%';const ang=Math.random()*Math.PI*2,sp=rand(40,120);p.style.transition='transform .7s cubic-bezier(.2,.6,.3,1),opacity .7s';wrap.appendChild(p);requestAnimationFrame(()=>{p.style.transform='translate('+Math.cos(ang)*sp+'px,'+Math.sin(ang)*sp+'px) scale(0)';p.style.opacity='0';});setTimeout(()=>p.remove(),760);}}
 function confetti(){const colors=['#ff5a6e','#3ec6ff','#ffd166','#5ddc8a','#c084fc'];for(let i=0;i<140;i++){const c=document.createElement('div');c.className='confetti';c.style.left=(Math.random()*100)+'vw';c.style.top='-20px';c.style.background=colors[i%colors.length];c.style.transform='rotate('+Math.random()*360+'deg)';const dur=2+Math.random()*2;c.style.transition='transform '+dur+'s linear,top '+dur+'s linear,opacity .4s '+(dur-.4)+'s';document.body.appendChild(c);const drift=(Math.random()-.5)*200;requestAnimationFrame(()=>{c.style.top='105vh';c.style.transform='translateX('+drift+'px) rotate('+Math.random()*720+'deg)';c.style.opacity='0';});setTimeout(()=>c.remove(),(dur+.6)*1000);}}
 function onPieceClick(src){if(G.busy||G.over)return;if(G.turn===1&&G.opts.vsCPU)return;const ci=G.selChip??(G.pending.length===1?0:null);if(ci===null){AudioFX.invalid();return;}const val=G.pending[ci].val;const sid=src==='home'?'home':src.id;const moves=movesForValue(G.turn,val).filter(m=>m.source===sid);if(!moves.length){AudioFX.invalid();return;}AudioFX.click();if(moves.length===1)executeMove(moves[0]);else showDestChoice(moves);}
 function showDestChoice(moves){clearHighlights();choiceMoves=moves;moves.forEach(m=>{const dest=m.finish?0:(m.toHome?HOME:m.path[m.path.length-1]);if(dest===HOME)return;const n=NODES[dest];if(!n)return;const g=el('g',{class:'hl',transform:'translate('+n.x+','+n.y+')'},hlLayer);el('circle',{r:30},g);g.addEventListener('click',()=>{AudioFX.click();executeMove(m);});});}
-async function animateMove(m){const pl=m.player;let g,temp=false;if(m.source==='home'){const ox=pl===0?-18:18,oy=pl===0?-10:10;g=makePieceEl(pl,1,{x:NODES[0].x+ox,y:NODES[0].y+oy});pieceLayer.appendChild(g);temp=true;}else{g=pieceLayer.querySelector('g[data-sid="'+m.source+'"]');if(!g){g=makePieceEl(pl,1,NODES[m.path[0]]);pieceLayer.appendChild(g);temp=true;}}for(let i=0;i<m.path.length;i++){const node=m.path[i];if(node===HOME){g.style.transition='opacity .25s';g.style.opacity='0';await sleep(250);break;}const n=NODES[node];g.style.transform='translate('+n.x+'px,'+n.y+'px)';if(i>0)AudioFX.step();await sleep(REDUCED?60:210);}if(m.finish){const n=NODES[0];g.style.transition='opacity .3s,transform .3s';g.style.opacity='0';g.style.transform='translate('+n.x+'px,'+n.y+'px) scale(1.7)';await sleep(320);}if(temp)g.remove();}
-async function executeMove(m){if(G.busy)return;G.busy=true;G.phase='animating';clearHighlights();const ci=G.selChip??0;G.pending.splice(ci,1);G.selChip=null;renderChips();renderPieces();updateHint();await animateMove(m);const ev=applyMove(m);if(ev.capture){AudioFX.capture();burst(m.path[m.path.length-1],'#ffffff');G.throwsLeft++;log(I18N.t(ev.capture>1?'log.capture':'log.capture.one',PLAYERS[m.player].name,ev.capture),'p'+(m.player+1));}if(ev.group){AudioFX.group();log(I18N.t('log.group',PLAYERS[m.player].name),'p'+(m.player+1));}if(ev.finish){AudioFX.finish();log(I18N.t(ev.finish>1?'log.finish':'log.finish.one',PLAYERS[m.player].name,ev.finish,G.finished[m.player]),'p'+(m.player+1));}if(ev.toHome)log(I18N.t('log.backhome',PLAYERS[m.player].name),'p'+(m.player+1));renderAll();if(G.finished[m.player]>=4){return win(m.player);}G.busy=false;settleTurn();}
+function scoreDot(pl,k){return document.querySelector('#playersStatus .dot[data-p="'+pl+'"][data-k="'+k+'"]');}
+function popScoreDots(pl,from,count){for(let i=0;i<count;i++){const d=scoreDot(pl,from+i);if(d)d.classList.add('pop');}}
+async function flyToScore(pl,count,srcEl){const r=srcEl.getBoundingClientRect(),fx=r.left+r.width/2,fy=r.top+r.height/2;srcEl.style.transition='opacity .18s';srcEl.style.opacity='0';const base=G.finished[pl],dur=REDUCED?120:560,gap=REDUCED?0:90,fl=[];for(let i=0;i<count;i++){const d=scoreDot(pl,base+i);if(!d)continue;const t=d.getBoundingClientRect();const e=document.createElement('div');e.className='fly-piece '+PLAYERS[pl].css;e.style.left=fx+'px';e.style.top=fy+'px';e.style.transitionDuration=dur+'ms';e.style.transitionDelay=(i*gap)+'ms';document.body.appendChild(e);fl.push([e,t.left+t.width/2-fx,t.top+t.height/2-fy,t.width/32]);}if(!fl.length){await sleep(REDUCED?60:220);return;}void fl[0][0].offsetWidth;fl.forEach(([e,dx,dy,sc])=>{e.style.transform='translate('+dx+'px,'+dy+'px) scale('+sc+')';e.style.opacity='.9';});await sleep(dur+(fl.length-1)*gap+40);fl.forEach(([e])=>e.remove());}
+const ENTER_MS=REDUCED?140:460,BACK_MS=REDUCED?140:520;
+function victimSnapshot(m){if(m.finish||m.toHome||!m.path.length)return null;const dest=m.path[m.path.length-1];if(dest===HOME)return null;const vs=stackAt(dest);if(!vs||vs.player===m.player)return null;return{el:pieceLayer.querySelector('g[data-sid="'+vs.id+'"]'),pl:vs.player,count:vs.count,node:dest};}
+async function flyToReserve(v){if(!v)return;if(v.el)v.el.remove();const z=RESERVE_ZONES[v.pl],base=Math.max(0,G.homeCount[v.pl]-v.count),from=NODES[v.node],gap=REDUCED?0:80,fl=[];
+for(let i=0;i<v.count;i++){const k=Math.min(base+i,RESERVE_SLOT_DY.length-1);const g=makePieceEl(v.pl,1,from);g.classList.add('reserve-fly');g.style.transition='transform '+BACK_MS+'ms cubic-bezier(.36,.06,.4,1.22) '+(i*gap)+'ms';pieceLayer.appendChild(g);fl.push([g,z.x,z.y+RESERVE_SLOT_DY[k]]);}
+if(!fl.length)return;void fl[0][0].getBoundingClientRect();
+fl.forEach(([g,x,y])=>{g.style.transform='translate('+x+'px,'+y+'px)';});
+await sleep(BACK_MS+(v.count-1)*gap+60);fl.forEach(([g])=>g.remove());}
+async function animateMove(m){const pl=m.player;let g,temp=false,fromReserve=false;if(m.source==='home'){const z=RESERVE_ZONES[pl],k=Math.min(Math.max(G.homeCount[pl]-1,0),RESERVE_SLOT_DY.length-1);const hidden=pieceLayer.querySelector('.home-cluster.'+PLAYERS[pl].css+' [data-rslot="'+k+'"]');if(hidden)hidden.style.opacity='0';g=makePieceEl(pl,1,{x:z.x,y:z.y+RESERVE_SLOT_DY[k]});pieceLayer.appendChild(g);temp=true;fromReserve=true;}else{g=pieceLayer.querySelector('g[data-sid="'+m.source+'"]');if(!g){g=makePieceEl(pl,1,NODES[m.path[0]]);pieceLayer.appendChild(g);temp=true;}}
+if(temp)void g.getBoundingClientRect();
+for(let i=0;i<m.path.length;i++){const node=m.path[i];if(node===HOME){g.style.transition='opacity .25s';g.style.opacity='0';await sleep(250);break;}const n=NODES[node];const ent=i===0&&fromReserve;if(ent){g.classList.add('entering');g.style.transition='transform '+ENTER_MS+'ms cubic-bezier(.34,1.32,.5,1)';}g.style.transform='translate('+n.x+'px,'+n.y+'px)';if(i>0||ent)AudioFX.step();await sleep(ent?ENTER_MS+40:(REDUCED?60:210));if(ent){g.classList.remove('entering');g.style.transition='';}}if(m.finish){const st=m.source==='home'?null:G.stacks.find(s=>s.id===m.source);await flyToScore(pl,st?st.count:1,g);}if(temp)g.remove();}
+async function executeMove(m){if(G.busy)return;G.busy=true;G.phase='animating';clearHighlights();const ci=G.selChip??0;G.pending.splice(ci,1);G.selChip=null;renderChips();renderPieces();updateHint();await animateMove(m);const vic=victimSnapshot(m);const ev=applyMove(m);recordMove(m,ev);if(ev.capture)G.turnEv.cap[m.player]+=ev.capture;if(ev.finish)G.turnEv.fin[m.player]+=ev.finish;if(ev.capture){AudioFX.capture();burst(m.path[m.path.length-1],'#ffffff');await flyToReserve(vic);G.throwsLeft++;log(I18N.t(ev.capture>1?'log.capture':'log.capture.one',PLAYERS[m.player].name,ev.capture),'p'+(m.player+1));}if(ev.group){AudioFX.group();log(I18N.t('log.group',PLAYERS[m.player].name),'p'+(m.player+1));}if(ev.finish){AudioFX.finish();log(I18N.t(ev.finish>1?'log.finish':'log.finish.one',PLAYERS[m.player].name,ev.finish,G.finished[m.player]),'p'+(m.player+1));}if(ev.toHome)log(I18N.t('log.backhome',PLAYERS[m.player].name),'p'+(m.player+1));renderAll();if(ev.finish)popScoreDots(m.player,G.finished[m.player]-ev.finish,ev.finish);if(G.finished[m.player]>=4){return win(m.player);}G.busy=false;settleTurn();}
 async function animateSticks(res){const sticks=$('#sticks');sticks.innerHTML='';const els=[];for(let i=0;i<4;i++){const s=document.createElement('div');s.className='stick';const fr=document.createElement('div');fr.className='face front';s.appendChild(fr);const bk=document.createElement('div');bk.className='face back';s.appendChild(bk);if(i===0){const mk=document.createElement('div');mk.className='mark';fr.appendChild(mk);}sticks.appendChild(s);els.push(s);}void sticks.offsetWidth;els.forEach((s,i)=>{s.style.animationDelay=(i*0.08)+'s';s.classList.add('flipping');});AudioFX.throwSticks();$('#resultLabel').textContent='';await sleep(REDUCED?200:900);els.forEach((s,i)=>{s.classList.remove('flipping');s.style.transition='transform .3s';s.style.transform=res.ups[i]?'rotateX(0deg)':'rotateX(180deg)';});await sleep(180);}
 function setResultLabel(res){const e=$('#resultLabel');e.innerHTML='<span class="kr">'+res.kr+'</span> · '+res.name+' '+(res.val>0?res.val:'-1')+(res.extra?' <span style="color:var(--good)">'+I18N.t('result.again')+'</span>':'');e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');}
-async function doThrow(){if(G.busy||G.over)return;if(G.throwsLeft<=0)return;G.busy=true;G.phase='animating';AudioFX.unlock();const res=rollSticks(G.opts.backDo);lastResult=res;await animateSticks(res);G.pending.push(res);G.throwsLeft-=1;if(res.extra)G.throwsLeft+=1;AudioFX.jingle(res.key);setResultLabel(res);log(I18N.t('log.roll',PLAYERS[G.turn].name,res.kr,res.name,(res.val>0?res.val:'-1'),(res.extra?I18N.t('log.extra'):'')),'p'+(G.turn+1));G.busy=false;G.selChip=null;settleTurn();}
+async function rollOff(){G.busy=true;G.phase='rolloff';renderAll();log(I18N.t('log.rolloff'),'');
+let winner=null;
+while(winner===null){const vals=[];
+for(let pl=0;pl<2;pl++){G.turn=pl;renderTurn();updateHint();await sleep(REDUCED?120:400);const res=rollSticks(false);vals.push(res.val);await animateSticks(res);setResultLabel(res);AudioFX.jingle(res.key);log(I18N.t('log.rolloff.throw',PLAYERS[pl].name,res.kr,res.name,res.val),'p'+(pl+1));}
+if(vals[0]===vals[1])log(I18N.t('log.rolloff.tie'),'');else winner=vals[0]>vals[1]?0:1;}
+G.turn=winner;G.busy=false;G.phase='awaitThrow';log(I18N.t('log.rolloff.win',PLAYERS[winner].name),'p'+(winner+1));renderAll();
+if(G.opts.vsCPU&&G.turn===1)cpuPlay();}
+async function doThrow(){if(G.busy||G.over)return;if(G.throwsLeft<=0)return;G.busy=true;G.phase='animating';AudioFX.unlock();const res=rollSticks(G.opts.backDo);lastResult=res;await animateSticks(res);const stats=G.stats[G.turn];stats.rolls++;stats.rollTotal+=res.val;if(res.extra)stats.bonus++;if(res.key==='backdo')stats.backdo++;G.pending.push(res);G.throwsLeft-=1;if(res.extra)G.throwsLeft+=1;AudioFX.jingle(res.key);setResultLabel(res);log(I18N.t('log.roll',PLAYERS[G.turn].name,res.kr,res.name,(res.val>0?res.val:'-1'),(res.extra?I18N.t('log.extra'):'')),'p'+(G.turn+1));G.busy=false;G.selChip=null;settleTurn();}
 function settleTurn(){if(G.over)return;const pl=G.turn;if(G.pending.length&&!anyLegalMove(pl)){log(I18N.t('log.nomove',PLAYERS[pl].name),'p'+(pl+1));G.pending=[];G.selChip=null;}if(G.pending.length===0&&G.throwsLeft===0){endTurn();return;}if(G.pending.length===0&&G.throwsLeft>0){G.phase='awaitThrow';G.selChip=null;renderAll();return;}G.phase='awaitMove';if(G.pending.length===1)G.selChip=0;renderAll();}
-function endTurn(){G.turn=1-G.turn;G.pending=[];G.throwsLeft=1;G.selChip=null;G.phase='awaitThrow';log(I18N.t('log.turn',PLAYERS[G.turn].name),'p'+(G.turn+1));renderAll();if(G.opts.vsCPU&&G.turn===1)cpuPlay();}
-function win(pl){G.over=true;G.phase='over';AudioFX.win();$('#winTitle').innerHTML='<span style="color:'+PLAYERS[pl].color+'">'+I18N.t('win.title',PLAYERS[pl].name)+'</span>';$('#winSub').textContent=I18N.t('win.subtitle');$('#winOverlay').classList.remove('hidden');confetti();renderAll();}
-function isThreatened(pl,dest){const foe=1-pl;for(const s of stacksOf(foe)){for(let v=1;v<=5;v++){const res=simulate(s.node,v);for(const r of res)if(r.path.includes(dest))return true;}}return false;}
-function scoreMove(pl,m){let s=Math.random()*4;if(m.finish)s+=60+10;if(m.toHome)s-=40;if(!m.finish&&!m.toHome){const dest=m.path[m.path.length-1];const en=stackAt(dest);if(en&&en.player!==pl)s+=55+12*en.count;const ally=G.stacks.find(st=>st.node===dest&&st.player===pl&&st.id!==m.source);if(ally)s+=20+4*ally.count;if(dest===5||dest===10||dest===22)s+=12;if(m.source==='home')s+=10;s+=m.val*1.5;if(isThreatened(pl,dest))s-=16;if(m.back)s-=15;}return s;}
-function pickCPUMove(){const pl=G.turn;let best=null,bs=-Infinity;G.pending.forEach((chip,idx)=>{movesForValue(pl,chip.val).forEach(m=>{const sc=scoreMove(pl,m);if(sc>bs){bs=sc;best=m;best._chipIdx=idx;}});});return best;}
+function endTurn(){pushMomentum();G.turn=1-G.turn;G.pending=[];G.throwsLeft=1;G.selChip=null;G.phase='awaitThrow';log(I18N.t('log.turn',PLAYERS[G.turn].name),'p'+(G.turn+1));renderAll();if(G.opts.vsCPU&&G.turn===1)cpuPlay();}
+function win(pl){G.over=true;G.phase='over';AudioFX.win();$('#winTitle').innerHTML='<span style="color:'+PLAYERS[pl].color+'">'+I18N.t('win.title',PLAYERS[pl].name)+'</span>';$('#winSub').textContent=I18N.t('win.subtitle');pushMomentum();renderMatchStats();$('#winOverlay').classList.remove('hidden');confetti();renderAll();}
+function isThreatened(pl,dest){const foe=1-pl;for(const s of stacksOf(foe)){for(let v=1;v<=5;v++){const res=simulate(s.node,v,s.dist);for(const r of res)if(r.path.includes(dest))return true;}}return false;}
+function scoreMove(pl,m,difficulty='normal'){const hard=difficulty==='hard';let s=Math.random()*(hard?1:4);if(m.finish)s+=hard?100:70;if(m.toHome)s-=hard?55:40;if(!m.finish&&!m.toHome){const dest=m.path[m.path.length-1];const en=stackAt(dest);if(en&&en.player!==pl)s+=(hard?82:55)+(hard?18:12)*en.count;const ally=G.stacks.find(st=>st.node===dest&&st.player===pl&&st.id!==m.source);if(ally)s+=(hard?30:20)+(hard?6:4)*ally.count;if(dest===5||dest===10||dest===22)s+=hard?18:12;if(m.source==='home')s+=hard?7:10;s+=m.val*(hard?2:1.5);if(isThreatened(pl,dest))s-=hard?32:16;if(m.back)s-=hard?22:15;}return s;}
+function pickCPUMove(){const pl=G.turn,difficulty=G.opts.difficulty||'normal',choices=[];G.pending.forEach((chip,idx)=>{movesForValue(pl,chip.val).forEach(m=>{m._chipIdx=idx;choices.push(m);});});if(!choices.length)return null;if(difficulty==='easy')return choices[Math.floor(Math.random()*choices.length)];let best=choices[0],bs=-Infinity;choices.forEach(m=>{const sc=scoreMove(pl,m,difficulty);if(sc>bs){bs=sc;best=m;}});return best;}
 async function cpuPlay(){if(G._cpu)return;G._cpu=true;try{while(!G.over&&G.opts.vsCPU&&G.turn===1){await sleep(REDUCED?200:700);if(G.over||G.turn!==1)break;if(G.throwsLeft>0&&(G.pending.length===0||G.phase==='awaitThrow'||G.phase==='awaitMove')){await doThrow();}else if(G.pending.length>0){const mv=pickCPUMove();if(!mv){G.pending=[];settleTurn();continue;}G.selChip=mv._chipIdx;const val=G.pending[mv._chipIdx].val;const moves=movesForValue(G.turn,val).filter(mm=>mm.source===mv.source&&JSON.stringify(mm.path)===JSON.stringify(mv.path));renderAll();await sleep(REDUCED?100:500);await executeMove(moves[0]||mv);}else break;}}finally{G._cpu=false;}}
 
-let setupMode='pvp',setupBack=true,setupSound=true;
+let setupMode='pvp',setupBack=true,setupSound=true,setupDifficulty='normal',setupStarter='p1',setupTheme=['modern','traditional'].includes(localStorage.getItem('yutnori_theme'))?localStorage.getItem('yutnori_theme'):'modern';
 function setOpt(id,on){$('#'+id).classList.toggle('on',on);}
 function bindOpt(id,cb){const o=$('#'+id);o.onclick=()=>{o.classList.toggle('on');cb(o.classList.contains('on'));AudioFX.click();};}
-function initSetup(){setupSound=AudioFX.isEnabled();setOpt('optSound',setupSound);setOpt('optBack',setupBack);QA('.mode-card').forEach(c=>{c.classList.toggle('sel',c.dataset.mode===setupMode);c.onclick=()=>{setupMode=c.dataset.mode;QA('.mode-card').forEach(x=>x.classList.toggle('sel',x===c));AudioFX.click();};});bindOpt('optBack',v=>setupBack=v);bindOpt('optSound',v=>{setupSound=v;AudioFX.setEnabled(v);});$('#startBtn').onclick=startGame;$('#soundBtn').onclick=()=>{const v=!AudioFX.isEnabled();AudioFX.setEnabled(v);$('#soundBtn').textContent=v?'🔊':'🔇';};$('#homeBtn').onclick=()=>{$('#gameScreen').classList.add('hidden');$('#winOverlay').classList.add('hidden');$('#setupScreen').classList.remove('hidden');};$('#rematchBtn').onclick=()=>{$('#winOverlay').classList.add('hidden');startGame();};$('#menuBtn').onclick=()=>{$('#winOverlay').classList.add('hidden');$('#gameScreen').classList.add('hidden');$('#setupScreen').classList.remove('hidden');};$('#throwBtn').onclick=doThrow;$('#logBtn').onclick=()=>{$('#logDrawer').classList.toggle('open');};$('#logClose').onclick=()=>{$('#logDrawer').classList.remove('open');};QA('#setupLang button,#gameLang button').forEach(b=>b.onclick=()=>{I18N.setLang(b.dataset.lang);AudioFX.click();});applyLang();$('#soundBtn').textContent=AudioFX.isEnabled()?'🔊':'🔇';}
-function startGame(){const opts={backDo:setupBack,sound:setupSound,vsCPU:setupMode==='cpu'};AudioFX.setEnabled(opts.sound);newGame(opts);buildBoard();$('#setupScreen').classList.add('hidden');$('#gameScreen').classList.remove('hidden');$('#soundBtn').textContent=opts.sound?'🔊':'🔇';$('#log').innerHTML='';log(I18N.t('log.newgame'),'');renderAll();}
+function renderDifficulty(){const box=$('#cpuDifficulty');box.classList.toggle('hidden',setupMode!=='cpu');QA('[data-cpu-level]').forEach(b=>b.classList.toggle('sel',b.dataset.cpuLevel===setupDifficulty));}
+function applyTheme(theme){setupTheme=theme==='traditional'?'traditional':'modern';document.body.dataset.theme=setupTheme;localStorage.setItem('yutnori_theme',setupTheme);QA('[data-theme-choice]').forEach(b=>b.classList.toggle('sel',b.dataset.themeChoice===setupTheme));const b=$('#themeBtn');if(b)b.title=themeT('toggle');}
+function initSetup(){setupSound=AudioFX.isEnabled();setOpt('optSound',setupSound);setOpt('optBack',setupBack);QA('.mode-card').forEach(c=>{c.classList.toggle('sel',c.dataset.mode===setupMode);c.onclick=()=>{setupMode=c.dataset.mode;QA('.mode-card').forEach(x=>x.classList.toggle('sel',x===c));renderDifficulty();AudioFX.click();};});QA('[data-cpu-level]').forEach(b=>b.onclick=()=>{setupDifficulty=b.dataset.cpuLevel;renderDifficulty();AudioFX.click();});QA('[data-starter]').forEach(b=>b.onclick=()=>{setupStarter=b.dataset.starter;QA('[data-starter]').forEach(x=>x.classList.toggle('sel',x===b));AudioFX.click();});QA('[data-theme-choice]').forEach(b=>b.onclick=()=>{applyTheme(b.dataset.themeChoice);AudioFX.click();});QA('[data-starter]').forEach(b=>b.classList.toggle('sel',b.dataset.starter===setupStarter));renderDifficulty();applyTheme(setupTheme);bindOpt('optBack',v=>setupBack=v);bindOpt('optSound',v=>{setupSound=v;AudioFX.setEnabled(v);});$('#startBtn').onclick=startGame;$('#soundBtn').onclick=()=>{const v=!AudioFX.isEnabled();AudioFX.setEnabled(v);$('#soundBtn').textContent=v?'🔊':'🔇';};$('#themeBtn').onclick=()=>{applyTheme(setupTheme==='modern'?'traditional':'modern');AudioFX.click();};$('#homeBtn').onclick=()=>{$('#gameScreen').classList.add('hidden');$('#winOverlay').classList.add('hidden');$('#setupScreen').classList.remove('hidden');};$('#rematchBtn').onclick=()=>{$('#winOverlay').classList.add('hidden');startGame();};$('#menuBtn').onclick=()=>{$('#winOverlay').classList.add('hidden');$('#gameScreen').classList.add('hidden');$('#setupScreen').classList.remove('hidden');};$('#throwBtn').onclick=doThrow;$('#logBtn').onclick=()=>{$('#logDrawer').classList.toggle('open');};$('#logClose').onclick=()=>{$('#logDrawer').classList.remove('open');};QA('#setupLang button,#gameLang button').forEach(b=>b.onclick=()=>{I18N.setLang(b.dataset.lang);AudioFX.click();});applyLang();$('#soundBtn').textContent=AudioFX.isEnabled()?'🔊':'🔇';}
+function startGame(){const opts={backDo:setupBack,sound:setupSound,vsCPU:setupMode==='cpu',difficulty:setupDifficulty,starter:setupStarter};AudioFX.setEnabled(opts.sound);newGame(opts);buildBoard();$('#setupScreen').classList.add('hidden');$('#gameScreen').classList.remove('hidden');$('#soundBtn').textContent=opts.sound?'🔊':'🔇';$('#log').innerHTML='';log(I18N.t('log.newgame'),'');renderAll();if(opts.starter==='random')rollOff();else if(opts.vsCPU&&G.turn===1)cpuPlay();}
 document.addEventListener('DOMContentLoaded',()=>{initSetup();buildBoard();});
 </script>
 </body>

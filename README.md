@@ -9,9 +9,11 @@ Gioco tradizionale coreano in un singolo file HTML — zero dipendenze, offline-
 - **Tabellone 29 caselle** con percorso antiorario, scorciatoie diagonali (angoli, centro)
 - **4 bastoncini virtuali**: 도 Do(1), 개 Gae(2), 걸 Geol(3), 윷 Yut(4+rilancio), 모 Mo(5+rilancio), **빽도 Back-do** (attivabile)
 - **Cattura, raggruppamento**, rilancio dopo cattura/Yut/Mo
-- **2 modalità**: giocatore locale / contro CPU (euristica intelligente)
+- **2 modalità**: giocatore locale / contro CPU con difficoltà Facile, Normale e Difficile
+- **Statistiche finali**: tiri, media, Yut/Mo, mosse, passi, bivi, catture e raggruppamenti per giocatore
 - **4 lingue**: Italiano · English · 한국어 · 中文
 - **Grafica moderna**: tema scuro, glassmorphism, animazioni (lancio 3D, particelle catture, confetti vittoria)
+- **Temi del tabellone**: Modern e Traditional, selezionabili e memorizzati localmente
 - **Effetti sonori sintetizzati** (Web Audio API, disattivabili)
 - **Responsive** — desktop e mobile con dock fisso in basso
 - Singolo file HTML (~36KB), niente server, niente npm, niente installazione
@@ -35,7 +37,9 @@ Gioco tradizionale coreano in un singolo file HTML — zero dipendenze, offline-
 | Solo bastoncino segnato↓ | 빽도 | -1 | — |
 
 - Le pedine **partono dalla casella 출발**
-- **Scorciatoie**: fermandoti esattamente su angolo NE (5) / NO (10) / centro (22) → diagonale
+- **Traguardo**: arrivare sull'ultima casella non basta; serve un ulteriore passo per uscire dal circuito
+- **Scorciatoie**: fermandoti esattamente su angolo NE (5) / NO (10) / centro (22) puoi scegliere tra diagonale e percorso esterno
+- **Back-do al centro**: puoi scegliere quale delle due diagonali ripercorrere
 - **Cattura** → pedina avversaria torna a casa + rilancio
 - **Raggruppamento (업기)** → pedine proprie sulla stessa casella viaggiano insieme
 
@@ -52,9 +56,11 @@ Traditional Korean board game in a single HTML file — zero dependencies, offli
 - **29-space board** with counter-clockwise path, diagonal shortcuts (corners, center)
 - **4 virtual sticks**: Do(1), Gae(2), Geol(3), Yut(4+rethrow), Mo(5+rethrow), **Back-do** (toggle)
 - **Capture, stacking (업기)**, extra throw after capture / Yut / Mo
-- **2 modes**: local multiplayer / vs CPU (smart heuristic)
+- **2 modes**: local multiplayer / vs CPU with Easy, Normal and Hard difficulty
+- **End-of-match statistics**: throws, averages, Yut/Mo, moves, steps, branches, captures and stacks per player
 - **4 languages**: English · Italiano · 한국어 · 中文
 - **Modern UI**: dark theme, glassmorphism, animations (3D stick toss, capture particles, win confetti)
+- **Board themes**: Modern and Traditional, selectable and saved locally
 - **Synthesized sound effects** (Web Audio API, toggle off)
 - **Responsive** — desktop & mobile with fixed bottom dock
 - Single HTML file (~36KB), no server, no npm, no setup
@@ -78,7 +84,9 @@ Traditional Korean board game in a single HTML file — zero dependencies, offli
 | Only marked↓   | 빽도 | -1    | —           |
 
 - Pieces **start from the 출발 square**
-- **Shortcuts**: land exactly on NE corner(5) / NW corner(10) / center(22) → diagonal path
+- **Finish**: reaching the final square is not enough; one further step is required to leave the course
+- **Shortcuts**: land exactly on NE corner(5) / NW corner(10) / center(22) and choose the diagonal or outer path
+- **Back-do at the center**: choose which of the two diagonals to move back along
 - **Capture** → opponent's piece goes home + extra throw
 - **Stacking (업기)** → own pieces on the same square travel together
 
