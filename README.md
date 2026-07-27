@@ -16,6 +16,7 @@ Gioco tradizionale coreano in un singolo file HTML — zero dipendenze, offline-
 - **Grafico dell'andamento**: a fine partita, barre divergenti turno per turno che mostrano chi era in vantaggio, con marcatori per catture e uscite
 - **Statistiche finali**: tiri, media, Yut/Mo, back-do, mosse, passi, bivi, catture e raggruppamenti per giocatore
 - **4 lingue**: Italiano · English · 한국어 · 中文
+- **Tutorial guidato opzionale**: partita deterministica contro CPU con raggruppamento, cattura, rilanci, scorciatoia, Back-do e uscita della prima pedina
 - **Grafica moderna**: tema scuro, glassmorphism, animazioni (lancio 3D, ingresso e rientro delle pedine, particelle catture, confetti vittoria)
 - **Temi del tabellone**: Modern e Traditional, selezionabili e memorizzati localmente
 - **Effetti sonori sintetizzati** (Web Audio API, disattivabili)
@@ -71,6 +72,7 @@ Traditional Korean board game in a single HTML file — zero dependencies, offli
 - **Momentum chart**: after the match, diverging bars per turn showing which player held the advantage, with markers for captures and pieces sent out
 - **End-of-match statistics**: throws, averages, Yut/Mo, back-do, moves, steps, branches, captures and stacks per player
 - **4 languages**: English · Italiano · 한국어 · 中文
+- **Optional guided tutorial**: a deterministic CPU match covering stacking, captures, extra throws, shortcuts, Back-do and the first completed piece
 - **Modern UI**: dark theme, glassmorphism, animations (3D stick toss, pieces entering and returning to the reserve, capture particles, win confetti)
 - **Board themes**: Modern and Traditional, selectable and saved locally
 - **Synthesized sound effects** (Web Audio API, toggle off)
