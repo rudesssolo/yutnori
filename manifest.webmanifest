@@ -10,7 +10,7 @@
   "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#0a0e1f",
   "theme_color": "#0a0e1f",
-  "orientation": "any",
+  "orientation": "portrait",
   "categories": ["games", "entertainment"],
   "icons": [
     {
