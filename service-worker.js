@@ -1,14 +1,13 @@
-const CACHE_NAME = 'yutnori-v3';
+const CACHE_NAME = 'yutnori-v4';
 const APP_SHELL = [
   './',
   './yutnori.html',
   './version.json',
   './manifest.webmanifest',
-  './icons/yutnori.svg',
-  './icons/yutnori-180.png',
-  './icons/yutnori-192.png',
-  './icons/yutnori-512.png',
-  './icons/yutnori-maskable-512.png'
+  './icons/yutnori-modern-180.png',
+  './icons/yutnori-modern-192.png',
+  './icons/yutnori-modern-512.png',
+  './icons/yutnori-modern-maskable-512.png'
 ];
 
 self.addEventListener('install', event => {

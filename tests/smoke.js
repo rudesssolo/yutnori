@@ -40,6 +40,8 @@ for (const icon of manifest.icons.filter(icon => icon.type === 'image/png')) {
 assert(worker.includes("'./version.json'"), 'Il service worker deve memorizzare version.json');
 assert(worker.includes('await cache.put(event.request, response.clone())'), 'La scrittura in cache deve essere attesa');
 assert(worker.includes('if (previousCaches.length) await notifyAppUpdate()'), 'L’aggiornamento del service worker deve avvisare le app già installate');
+assert(html.includes('icons/yutnori-modern-192.png'), 'La favicon deve usare la nuova icona');
+assert(html.includes('icons/yutnori-modern-180.png'), 'Apple touch icon deve usare la nuova icona');
 assert(html.includes("fetch('./version.json',{cache:'no-store'})"), 'Il controllo aggiornamenti deve usare version.json');
 assert(html.includes("G.phase==='awaitThrow'||(!T&&G.phase==='awaitMove')"), 'Il tutorial non deve consentire lanci durante una mossa');
 assert(html.includes('while(G===game&&!game.over'), 'La CPU deve interrompersi quando cambia partita');
