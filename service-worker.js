@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yutnori-v1';
+const CACHE_NAME = 'yutnori-v2';
 const APP_SHELL = [
   './',
   './yutnori.html',
@@ -14,17 +14,47 @@ self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
 
+async function notifyAppUpdate() {
+  const windows = await self.clients.matchAll({type: 'window', includeUncontrolled: true});
+  windows.forEach(windowClient => windowClient.postMessage({type: 'YUTNORI_APP_UPDATED'}));
+}
+
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith((async () => {
+    const url = new URL(event.request.url);
+    const isGamePage = url.origin === self.location.origin && url.pathname.endsWith('/yutnori.html');
+    const refreshFirst = url.origin === self.location.origin && (
+      event.request.mode === 'navigate' ||
+      isGamePage ||
+      url.pathname.endsWith('/manifest.webmanifest')
+    );
+    const cache = await caches.open(CACHE_NAME);
+
+    if (refreshFirst) {
+      try {
+        const previous = await caches.match(event.request);
+        const response = await fetch(event.request);
+        if (response && response.ok) {
+          if (isGamePage && event.request.mode !== 'navigate' && previous) {
+            const [oldPage, newPage] = await Promise.all([previous.clone().text(), response.clone().text()]);
+            if (oldPage !== newPage) await notifyAppUpdate();
+          }
+          await cache.put(event.request, response.clone());
+        }
+        return response;
+      } catch (error) {
+        return (await caches.match(event.request)) || (event.request.mode === 'navigate' ? caches.match('./yutnori.html') : Promise.reject(error));
+      }
+    }
+
     const cached = await caches.match(event.request);
     if (cached) return cached;
 
     try {
       const response = await fetch(event.request);
       if (response && (response.ok || response.type === 'opaque')) {
-        const cache = await caches.open(CACHE_NAME);
         cache.put(event.request, response.clone());
       }
       return response;

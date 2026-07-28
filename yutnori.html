@@ -186,6 +186,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
 #fxlayer{position:absolute;inset:0;pointer-events:none;z-index:20;overflow:hidden}
 .particle{position:absolute;width:10px;height:10px;border-radius:2px;pointer-events:none}
 .confetti{position:fixed;width:10px;height:14px;border-radius:2px;pointer-events:none;z-index:70}
+.update-toast{position:fixed;z-index:140;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:10px 12px 10px 16px;font-size:13px;font-weight:700;animation:pop .25s ease-out}.update-toast .btn{padding:.55em 1em;font-size:13px;white-space:nowrap}
 @media(max-width:980px){
   .setup-options-overlay{padding:10px}.setup-options-card{max-height:calc(100dvh - 20px);padding:14px}.setup-options-head{margin-bottom:8px}.setup-options-head h2{font-size:18px}.momentum{padding:9px;margin-bottom:12px}.mom-head h4{font-size:12px}.mom-legend{gap:9px;font-size:10px}.mom-tip{min-width:0;font-size:10px}
   #gameScreen{height:100vh;height:100dvh;overflow:hidden}
@@ -229,6 +230,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
   #gameScreen header.topbar{padding:7px 8px}.topbar .title{font-size:17px}#gameScreen .icon-btn{width:36px;height:36px;font-size:18px}#gameScreen #dock{gap:4px;padding:6px 10px}#gameScreen .turn-badge{justify-content:center;text-align:center;font-size:16px}.turn-copy{justify-content:center}.turn-state{width:100%;font-size:11px}#gameScreen .players-status{gap:6px;margin-top:4px}#gameScreen .pstat{padding:5px 8px}#gameScreen .pstat .nm{font-size:13px}#gameScreen .pstat .dot{width:20px;height:20px}#gameScreen .sticks-area{gap:6px;padding:4px 4px 6px}#gameScreen .sticks{height:62px}#gameScreen .stick{width:22px;height:50px}#gameScreen .stick .mark{width:7px;height:7px}#gameScreen .throw-overlay .btn{font-size:15px;padding:.65em 1.05em}#gameScreen .result-label{height:26px;font-size:17px;line-height:26px}#gameScreen .result-label .kr{font-size:20px}#gameScreen .chips{min-height:32px}#gameScreen .chip{padding:6px 11px;font-size:14px}#gameScreen .hint{height:21px;font-size:13px}#gameScreen #tutorialCard{padding:10px;margin-top:6px}#gameScreen .tutorial-head h3{font-size:16px}#gameScreen .tutorial-copy{font-size:13px;line-height:1.35;margin-top:6px}#gameScreen .piece-art,#gameScreen .home-cluster [data-rslot],#gameScreen .piece>text{transform:scale(1.18);transform-box:fill-box;transform-origin:center}
 }
 @media(max-width:480px){.difficulty-options{grid-template-columns:1fr}.difficulty-card{min-height:0;text-align:center}}
+@media(max-width:480px){.update-toast{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));justify-content:space-between}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.05ms!important}}
 </style>
 </head>
@@ -369,6 +371,10 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
     </div>
   </div>
 </div>
+<div id="updateToast" class="update-toast glass hidden" role="status" aria-live="polite">
+  <span id="updateToastText">Nuova versione disponibile</span>
+  <button class="btn" id="updateBtn" type="button">Aggiorna</button>
+</div>
 <script>"use strict";
 const $=s=>document.querySelector(s);
 const QA=s=>[...document.querySelectorAll(s)];
@@ -441,6 +447,14 @@ ko:{button:"🎓 안내 튜토리얼",exit:"나가기",doneBtn:"옵션으로 돌
 zh:{button:"🎓 引导教程",exit:"退出",doneBtn:"返回选项"}
 };
 const tutorialL=()=>TUTORIAL_I18N[I18N.cur]||TUTORIAL_I18N.en;
+const UPDATE_I18N={
+it:{message:"Nuova versione disponibile",button:"Aggiorna"},
+en:{message:"New version available",button:"Update"},
+ko:{message:"새 버전을 사용할 수 있습니다",button:"업데이트"},
+zh:{message:"有新版本可用",button:"更新"}
+};
+const updateT=()=>UPDATE_I18N[I18N.cur]||UPDATE_I18N.en;
+function renderUpdateToast(){const text=$('#updateToastText'),button=$('#updateBtn'),copy=updateT();if(text)text.textContent=copy.message;if(button)button.textContent=copy.button;}
 function applyLang(){
 QA('[data-i18n]').forEach(e=>e.textContent=I18N.t(e.dataset.i18n));
 QA('[data-i18n-html]').forEach(e=>e.innerHTML=I18N.t(e.dataset.i18nHtml));
@@ -452,6 +466,7 @@ QA('[data-finish-i18n]').forEach(e=>e.textContent=FINISH_RULE_I18N[I18N.cur]||FI
 QA('[data-tutorial-i18n]').forEach(e=>e.textContent=tutorialL()[e.dataset.tutorialI18n]||'');
 const themeButton=$('#themeBtn');if(themeButton)themeButton.title=themeT('toggle');
 $('#logClose').title=I18N.t('header.close');
+renderUpdateToast();
 PLAYERS[0].name=I18N.t('player.1');PLAYERS[1].name=(G&&G.opts.vsCPU)?I18N.t('player.cpu'):I18N.t('player.2');
 QA('.lang-switch button').forEach(b=>b.classList.toggle('sel',b.dataset.lang===I18N.cur));
 if($('#cpuLevelLabel'))renderDifficulty();
@@ -930,13 +945,25 @@ function setSetupOptionsOpen(open){const overlay=$('#setupOptionsOverlay');if(!o
 function renderDifficulty(){const box=$('#cpuDifficulty'),level=$('#cpuLevelLabel');box.classList.toggle('hidden',setupMode!=='cpu');if(level)level.textContent=cpuT(setupDifficulty+'.title');QA('[data-cpu-level]').forEach(b=>b.classList.toggle('sel',b.dataset.cpuLevel===setupDifficulty));}
 function applyTheme(theme){setupTheme=theme==='traditional'?'traditional':'modern';document.body.dataset.theme=setupTheme;localStorage.setItem('yutnori_theme',setupTheme);QA('[data-theme-choice]').forEach(b=>b.classList.toggle('sel',b.dataset.themeChoice===setupTheme));const b=$('#themeBtn');if(b)b.title=themeT('toggle');const meta=$('#themeColorMeta');if(meta)meta.content=setupTheme==='traditional'?'#21150d':'#0a0e1f';}
 let installPromptEvent=null;
+let updateNoticeVisible=false;
 function updateInstallButton(){const button=$('#installBtn');if(button)button.classList.toggle('hidden',!installPromptEvent);}
+function showUpdateNotice(show){updateNoticeVisible=show;const toast=$('#updateToast');if(toast)toast.classList.toggle('hidden',!show);}
+async function checkForAppUpdate(){
+  if(!navigator.onLine||document.hidden)return;
+  try{await fetch('./yutnori.html',{cache:'no-store'});}catch(error){}
+}
 function initPWA(){
-  if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(error=>console.warn('Impossibile attivare la modalità offline',error)));
+  if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').then(registration=>registration.update()).catch(error=>console.warn('Impossibile attivare la modalità offline',error)));
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPromptEvent=event;updateInstallButton();});
   window.addEventListener('appinstalled',()=>{installPromptEvent=null;updateInstallButton();});
   const button=$('#installBtn');
   if(button)button.onclick=async()=>{if(!installPromptEvent)return;const prompt=installPromptEvent;installPromptEvent=null;updateInstallButton();await prompt.prompt();await prompt.userChoice;};
+  const updateButton=$('#updateBtn');
+  if(updateButton)updateButton.onclick=()=>{showUpdateNotice(false);location.reload();};
+  if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',event=>{if(event.data&&event.data.type==='YUTNORI_APP_UPDATED')showUpdateNotice(true);});
+  window.addEventListener('focus',checkForAppUpdate);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkForAppUpdate();});
+  void checkForAppUpdate();
 }
 function initSetup(){const setupOverlay=document.getElementById("setupOptionsOverlay");if(setupOverlay)document.body.appendChild(setupOverlay);setupSound=AudioFX.isEnabled();setOpt('optSound',setupSound);setOpt('optBack',setupBack);QA('.mode-card').forEach(c=>{c.classList.toggle('sel',c.dataset.mode===setupMode);c.onclick=()=>{setupMode=c.dataset.mode;QA('.mode-card').forEach(x=>x.classList.toggle('sel',x===c));renderDifficulty();AudioFX.click();};});QA('[data-cpu-level]').forEach(b=>b.onclick=()=>{setupDifficulty=b.dataset.cpuLevel;renderDifficulty();AudioFX.click();});QA('[data-starter]').forEach(b=>b.onclick=()=>{setupStarter=b.dataset.starter;QA('[data-starter]').forEach(x=>x.classList.toggle('sel',x===b));AudioFX.click();});QA('[data-theme-choice]').forEach(b=>b.onclick=()=>{applyTheme(b.dataset.themeChoice);AudioFX.click();});QA('[data-starter]').forEach(b=>b.classList.toggle('sel',b.dataset.starter===setupStarter));$('#setupOptionsBtn').onclick=()=>setSetupOptionsOpen(true);$('#setupOptionsClose').onclick=()=>setSetupOptionsOpen(false);$('#setupOptionsOverlay').onclick=e=>{if(e.target===e.currentTarget)setSetupOptionsOpen(false);};document.addEventListener('keydown',e=>{if(e.key==='Escape')setSetupOptionsOpen(false);});renderDifficulty();applyTheme(setupTheme);bindOpt('optBack',v=>setupBack=v);bindOpt('optSound',v=>{setupSound=v;AudioFX.setEnabled(v);});$('#startBtn').onclick=startGame;$('#tutorialBtn').onclick=()=>{AudioFX.click();startTutorial();};$('#tutorialExit').onclick=exitTutorial;$('#soundBtn').onclick=()=>{const v=!AudioFX.isEnabled();AudioFX.setEnabled(v);$('#soundBtn').textContent=v?'🔊':'🔇';};$('#themeBtn').onclick=()=>{applyTheme(setupTheme==='traditional'?'modern':'traditional');AudioFX.click();};$('#homeBtn').onclick=()=>{if(T){exitTutorial();return;}$('#gameScreen').classList.add('hidden');$('#winOverlay').classList.add('hidden');$('#setupScreen').classList.remove('hidden');};$('#rematchBtn').onclick=()=>{$('#winOverlay').classList.add('hidden');startGame();};$('#menuBtn').onclick=()=>{$('#winOverlay').classList.add('hidden');$('#gameScreen').classList.add('hidden');$('#setupScreen').classList.remove('hidden');};const throwSurface=$('#yut3d-container');throwSurface.onclick=doThrow;throwSurface.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();doThrow();}};$('#sticks').onclick=doThrow;$('#logBtn').onclick=()=>{$('#logDrawer').classList.toggle('open');};$('#logClose').onclick=()=>{$('#logDrawer').classList.remove('open');};QA('#setupLang button,#gameLang button').forEach(b=>b.onclick=()=>{I18N.setLang(b.dataset.lang);AudioFX.click();});applyLang();$('#soundBtn').textContent=AudioFX.isEnabled()?'🔊':'🔇';}
 let mobileBackNavigationArmed=false;
