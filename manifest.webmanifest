@@ -1,0 +1,23 @@
+{
+  "id": "./yutnori.html",
+  "name": "Yutnori · 윷놀이",
+  "short_name": "Yutnori",
+  "description": "Il tradizionale gioco da tavolo coreano.",
+  "lang": "it",
+  "start_url": "./yutnori.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "background_color": "#0a0e1f",
+  "theme_color": "#0a0e1f",
+  "orientation": "any",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "icons/yutnori.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

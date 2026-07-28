@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>윷놀이 · Yutnori</title>
+<meta name="description" content="Yutnori, il tradizionale gioco da tavolo coreano.">
+<meta name="theme-color" content="#0a0e1f" id="themeColorMeta">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Yutnori">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/yutnori.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/yutnori.svg">
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script type="module">
 import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js";
@@ -286,6 +295,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
     </details>
     <div class="row" style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
       <button class="btn ghost" id="tutorialBtn" data-tutorial-i18n="button">🎓 Tutorial guidato</button>
+      <button class="btn ghost hidden" id="installBtn" type="button" aria-label="Installa Yutnori">📲 Installa app</button>
       <button class="btn" id="startBtn" style="font-size:18px;padding:.85em 2.2em" data-i18n="setup.start">▶ Inizia la partita</button>
     </div>
   </div>
@@ -918,7 +928,16 @@ function setOpt(id,on){$('#'+id).classList.toggle('on',on);}
 function bindOpt(id,cb){const o=$('#'+id);o.onclick=()=>{o.classList.toggle('on');cb(o.classList.contains('on'));AudioFX.click();};}
 function setSetupOptionsOpen(open){const overlay=$('#setupOptionsOverlay');if(!overlay)return;overlay.classList.toggle('hidden',!open);if(open)$('#setupOptionsClose').focus();}
 function renderDifficulty(){const box=$('#cpuDifficulty'),level=$('#cpuLevelLabel');box.classList.toggle('hidden',setupMode!=='cpu');if(level)level.textContent=cpuT(setupDifficulty+'.title');QA('[data-cpu-level]').forEach(b=>b.classList.toggle('sel',b.dataset.cpuLevel===setupDifficulty));}
-function applyTheme(theme){setupTheme=theme==='traditional'?'traditional':'modern';document.body.dataset.theme=setupTheme;localStorage.setItem('yutnori_theme',setupTheme);QA('[data-theme-choice]').forEach(b=>b.classList.toggle('sel',b.dataset.themeChoice===setupTheme));const b=$('#themeBtn');if(b)b.title=themeT('toggle');}
+function applyTheme(theme){setupTheme=theme==='traditional'?'traditional':'modern';document.body.dataset.theme=setupTheme;localStorage.setItem('yutnori_theme',setupTheme);QA('[data-theme-choice]').forEach(b=>b.classList.toggle('sel',b.dataset.themeChoice===setupTheme));const b=$('#themeBtn');if(b)b.title=themeT('toggle');const meta=$('#themeColorMeta');if(meta)meta.content=setupTheme==='traditional'?'#21150d':'#0a0e1f';}
+let installPromptEvent=null;
+function updateInstallButton(){const button=$('#installBtn');if(button)button.classList.toggle('hidden',!installPromptEvent);}
+function initPWA(){
+  if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(error=>console.warn('Impossibile attivare la modalità offline',error)));
+  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPromptEvent=event;updateInstallButton();});
+  window.addEventListener('appinstalled',()=>{installPromptEvent=null;updateInstallButton();});
+  const button=$('#installBtn');
+  if(button)button.onclick=async()=>{if(!installPromptEvent)return;const prompt=installPromptEvent;installPromptEvent=null;updateInstallButton();await prompt.prompt();await prompt.userChoice;};
+}
 function initSetup(){const setupOverlay=document.getElementById("setupOptionsOverlay");if(setupOverlay)document.body.appendChild(setupOverlay);setupSound=AudioFX.isEnabled();setOpt('optSound',setupSound);setOpt('optBack',setupBack);QA('.mode-card').forEach(c=>{c.classList.toggle('sel',c.dataset.mode===setupMode);c.onclick=()=>{setupMode=c.dataset.mode;QA('.mode-card').forEach(x=>x.classList.toggle('sel',x===c));renderDifficulty();AudioFX.click();};});QA('[data-cpu-level]').forEach(b=>b.onclick=()=>{setupDifficulty=b.dataset.cpuLevel;renderDifficulty();AudioFX.click();});QA('[data-starter]').forEach(b=>b.onclick=()=>{setupStarter=b.dataset.starter;QA('[data-starter]').forEach(x=>x.classList.toggle('sel',x===b));AudioFX.click();});QA('[data-theme-choice]').forEach(b=>b.onclick=()=>{applyTheme(b.dataset.themeChoice);AudioFX.click();});QA('[data-starter]').forEach(b=>b.classList.toggle('sel',b.dataset.starter===setupStarter));$('#setupOptionsBtn').onclick=()=>setSetupOptionsOpen(true);$('#setupOptionsClose').onclick=()=>setSetupOptionsOpen(false);$('#setupOptionsOverlay').onclick=e=>{if(e.target===e.currentTarget)setSetupOptionsOpen(false);};document.addEventListener('keydown',e=>{if(e.key==='Escape')setSetupOptionsOpen(false);});renderDifficulty();applyTheme(setupTheme);bindOpt('optBack',v=>setupBack=v);bindOpt('optSound',v=>{setupSound=v;AudioFX.setEnabled(v);});$('#startBtn').onclick=startGame;$('#tutorialBtn').onclick=()=>{AudioFX.click();startTutorial();};$('#tutorialExit').onclick=exitTutorial;$('#soundBtn').onclick=()=>{const v=!AudioFX.isEnabled();AudioFX.setEnabled(v);$('#soundBtn').textContent=v?'🔊':'🔇';};$('#themeBtn').onclick=()=>{applyTheme(setupTheme==='traditional'?'modern':'traditional');AudioFX.click();};$('#homeBtn').onclick=()=>{if(T){exitTutorial();return;}$('#gameScreen').classList.add('hidden');$('#winOverlay').classList.add('hidden');$('#setupScreen').classList.remove('hidden');};$('#rematchBtn').onclick=()=>{$('#winOverlay').classList.add('hidden');startGame();};$('#menuBtn').onclick=()=>{$('#winOverlay').classList.add('hidden');$('#gameScreen').classList.add('hidden');$('#setupScreen').classList.remove('hidden');};const throwSurface=$('#yut3d-container');throwSurface.onclick=doThrow;throwSurface.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();doThrow();}};$('#sticks').onclick=doThrow;$('#logBtn').onclick=()=>{$('#logDrawer').classList.toggle('open');};$('#logClose').onclick=()=>{$('#logDrawer').classList.remove('open');};QA('#setupLang button,#gameLang button').forEach(b=>b.onclick=()=>{I18N.setLang(b.dataset.lang);AudioFX.click();});applyLang();$('#soundBtn').textContent=AudioFX.isEnabled()?'🔊':'🔇';}
 let mobileBackNavigationArmed=false;
 const mobileBackNavigationEnabled=()=>matchMedia('(max-width:600px)').matches;
@@ -929,7 +948,7 @@ function leaveTutorialForMenu(){leaveGameForMenu();}
 function handleMobileBackNavigation(){if(!mobileBackNavigationEnabled()||!mobileBackNavigationArmed||!gameIsOpen())return;mobileBackNavigationArmed=false;if(confirmLeaveGame())leaveGameForMenu(true);else armMobileBackNavigation();}
 addEventListener('popstate',handleMobileBackNavigation);
 function startGame(){const opts={backDo:setupBack,sound:setupSound,vsCPU:setupMode==='cpu',difficulty:setupDifficulty,starter:setupStarter};AudioFX.setEnabled(opts.sound);newGame(opts);buildBoard();$('#setupScreen').classList.add('hidden');$('#gameScreen').classList.remove('hidden');initYut3D();resetYut3D();mobileBackNavigationArmed=false;armMobileBackNavigation();$('#soundBtn').textContent=opts.sound?'🔊':'🔇';$('#log').innerHTML='';log(I18N.t('log.newgame'),'');renderAll();if(opts.starter==='random')rollOff();else if(opts.vsCPU&&G.turn===1)cpuPlay();}
-document.addEventListener('DOMContentLoaded',()=>{initSetup();initYut3D();$('#homeBtn').onclick=leaveGameForMenu;$('#tutorialExit').onclick=leaveTutorialForMenu;$('#throwOverlayBtn').onclick=e=>{e.stopPropagation();doThrow(e.detail?e:undefined);};buildBoard();});
+document.addEventListener('DOMContentLoaded',()=>{initSetup();initPWA();initYut3D();$('#homeBtn').onclick=leaveGameForMenu;$('#tutorialExit').onclick=leaveTutorialForMenu;$('#throwOverlayBtn').onclick=e=>{e.stopPropagation();doThrow(e.detail?e:undefined);};buildBoard();});
 </script>
 </body>
 </html>

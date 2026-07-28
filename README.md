@@ -1,6 +1,6 @@
 # 윷놀이 Yutnori
 
-Gioco tradizionale coreano in un singolo file HTML — zero dipendenze, offline-ready.
+Gioco tradizionale coreano in HTML — installabile come app (PWA), senza build né npm.
 
 [🇬🇧 English version below ↑](#english)
 
@@ -22,14 +22,18 @@ Gioco tradizionale coreano in un singolo file HTML — zero dipendenze, offline-
 - **Effetti sonori sintetizzati** (Web Audio API, disattivabili)
 - **Responsive** — desktop e mobile con dock fisso in basso
 - **Accessibilità**: rispetta `prefers-reduced-motion`, grafico con etichetta descrittiva
-- Singolo file HTML (~78KB), niente server, niente npm, niente installazione
+- **Installabile su smartphone**: manifest, icona, cache offline e modalità standalone
 
 ## Come giocare
 
-1. Apri `yutnori.html` in un browser
+1. Pubblica la cartella su un server HTTPS (oppure avviala in locale con `python3 -m http.server`)
 2. Scegli modalità (2 giocatori / CPU), chi inizia, tema e lingua
 3. Lancia i bastoncini 🎲 e muovi le pedine
 4. Porta tutte e 4 le tue pedine fuori dal tabellone per vincere
+
+## Installazione su smartphone
+
+Apri il gioco da un indirizzo HTTPS. Su Android/Chrome comparirà il pulsante **Installa app** quando il browser lo rende disponibile; in alternativa usa il menu del browser → **Installa app** / **Aggiungi a schermata Home**. Su iPhone/iPad usa Condividi → **Aggiungi a Home** in Safari. Dopo la prima apertura il gioco rimane disponibile anche offline.
 
 ## Regole rapide
 
@@ -58,7 +62,7 @@ Con la regola Back-do disattivata quel 5% si somma a 도 Do (20,0%). Valore medi
 
 # 윷놀이 Yutnori
 
-Traditional Korean board game in a single HTML file — zero dependencies, offline-ready.
+Traditional Korean board game in HTML — installable as an app (PWA), with no build step or npm.
 
 ## Features
 
@@ -78,14 +82,18 @@ Traditional Korean board game in a single HTML file — zero dependencies, offli
 - **Synthesized sound effects** (Web Audio API, toggle off)
 - **Responsive** — desktop & mobile with fixed bottom dock
 - **Accessibility**: honours `prefers-reduced-motion`, chart carries a descriptive label
-- Single HTML file (~78KB), no server, no npm, no setup
+- **Installable on phones**: manifest, icon, offline cache and standalone mode
 
 ## How to play
 
-1. Open `yutnori.html` in a browser
+1. Host the folder over HTTPS (or run it locally with `python3 -m http.server`)
 2. Choose mode (2 players / CPU), who starts, theme and language
 3. Throw the sticks 🎲 and move your pieces
 4. Get all 4 pieces out of the board to win
+
+## Install on a phone
+
+Open the game from an HTTPS address. Android/Chrome shows the **Install app** button when available; otherwise use the browser menu → **Install app** / **Add to Home screen**. On iPhone/iPad, use Share → **Add to Home Screen** in Safari. After its first opening, the game is available offline.
 
 ## Quick rules
 
