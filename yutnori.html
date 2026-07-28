@@ -83,10 +83,12 @@ main.game{flex:1;display:grid;grid-template-columns:minmax(300px,1fr) minmax(420
 .drawer-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
 #logClose{display:none}
 #logBtn{display:none}
-.turn-badge{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
-.turn-dot{width:14px;height:14px;border-radius:50%}
+.turn-badge{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--turn-color,var(--panel-bd));border-radius:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--turn-color,var(--gold)) 18%,transparent),rgba(255,255,255,.04));font-weight:700;font-size:16px;transition:border-color .18s,background .18s}
+.turn-dot{width:14px;height:14px;border-radius:50%;background:var(--turn-color);box-shadow:0 0 0 4px color-mix(in srgb,var(--turn-color) 18%,transparent);flex:none}
+.turn-copy{display:flex;align-items:baseline;gap:7px;min-width:0;flex-wrap:wrap}.turn-player{color:var(--turn-color)}.turn-state{font-size:12px;font-weight:600;color:var(--mut)}
 .players-status{display:flex;flex-direction:column;gap:8px}
-.pstat{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--panel-bd)}
+.pstat{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--panel-bd);transition:border-color .18s,background .18s,box-shadow .18s}
+.pstat.active{border-color:var(--player-color);background:linear-gradient(90deg,color-mix(in srgb,var(--player-color) 20%,transparent),rgba(255,255,255,.05));box-shadow:inset 3px 0 0 var(--player-color),0 0 0 1px color-mix(in srgb,var(--player-color) 18%,transparent)}
 .pstat .nm{font-weight:700;flex:1}.pstat .dots{display:flex;gap:5px}
 .pstat .dot{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;opacity:.4}
 .pstat .dot.home{opacity:1;cursor:pointer}
@@ -100,6 +102,9 @@ main.game{flex:1;display:grid;grid-template-columns:minmax(300px,1fr) minmax(420
 #yut3d-container.disabled{cursor:default}
 #yut3d-container.throw-ready{box-shadow:inset 0 0 0 2px rgba(255,209,102,.28)}
 #yut3d-container canvas{display:block;width:100%;height:100%;outline:none}
+.throw-overlay{position:absolute;inset:0;z-index:3;display:grid;place-items:center;pointer-events:none;padding:18px;background:radial-gradient(circle at center,rgba(8,12,29,.12),transparent 55%)}
+.throw-overlay .btn{pointer-events:auto;font-size:17px;box-shadow:0 8px 26px rgba(255,170,60,.4),0 0 0 5px rgba(255,209,102,.13)}
+.throw-overlay .btn:focus-visible{outline:3px solid #fff;outline-offset:4px}
 .sticks{display:flex;gap:14px;height:110px;align-items:center;perspective:700px}
 .stick{width:34px;height:92px;border-radius:18px;position:relative;transform-style:preserve-3d;transition:transform .3s}
 .stick .face{position:absolute;inset:0;border-radius:18px;backface-visibility:hidden}
@@ -135,7 +140,7 @@ main.game{flex:1;display:grid;grid-template-columns:minmax(300px,1fr) minmax(420
 @keyframes scorepop{0%{transform:scale(.35)}55%{transform:scale(1.5)}100%{transform:scale(1)}}
 .piece{transition:transform .2s ease,filter .15s ease}
 .piece-art{transform-box:fill-box;transform-origin:center}
-.piece.movable{cursor:pointer;filter:drop-shadow(0 0 6px rgba(255,209,102,.9))}
+.piece.movable,.piece.tutorial-target{cursor:pointer;filter:drop-shadow(0 0 4px rgba(255,247,189,.85)) drop-shadow(0 0 10px rgba(255,209,102,.7)) drop-shadow(0 0 16px rgba(255,170,60,.38))}.piece.movable .ring,.piece.tutorial-target .ring{stroke:#fff2ad;stroke-width:4;opacity:.95;animation:tutorialPieceRing 1.08s ease-in-out infinite}@keyframes tutorialPieceRing{0%,100%{stroke-width:3;filter:drop-shadow(0 0 2px rgba(255,209,102,.7))}50%{stroke-width:5;filter:drop-shadow(0 0 6px rgba(255,247,189,.9))}}
 .piece.entering,.piece.reserve-fly{filter:drop-shadow(0 7px 11px rgba(0,0,0,.5))}
 .piece .ring{fill:none;stroke:var(--piece-ring);stroke-width:3;opacity:.85}
 .hl{cursor:pointer}
@@ -187,7 +192,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
   #dock .pblock:nth-child(1){grid-area:turn}
   #dock .pblock:nth-child(2){grid-area:sticks}
   #dock .pblock:nth-child(3){grid-area:chips}
-  .turn-badge{font-size:14px}
+  .turn-badge{font-size:14px;padding:7px 9px}.turn-state{font-size:11px}
   .players-status{flex-direction:row;gap:8px;margin-top:6px}
   .pstat{padding:4px 8px;gap:6px;flex:1;min-width:0}
   .pstat .nm{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -212,7 +217,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
 }
 @media(max-width:600px){#setupScreen{height:100dvh;min-height:0;overflow:hidden;padding:8px;align-items:flex-start}.setup-card{padding:14px 12px;max-height:100%;overflow:hidden}.setup-card .brand{font-size:clamp(40px,15vw,56px)}#setupLang{margin-bottom:8px}.tagline{margin:4px 0 12px;font-size:12px}.modes{gap:8px;margin-bottom:10px}.mode-card{padding:12px 8px}.mode-card .ico{font-size:28px;margin-bottom:4px}.mode-card h3{font-size:15px}.mode-card p{font-size:11px}.setup-options-btn{margin-bottom:10px}.difficulty-options{gap:6px}.difficulty-card{min-height:62px;padding:8px 6px}.difficulty-card b{font-size:12px}.difficulty-card small{font-size:10px}.theme-picker{margin:0 0 12px}.opts{gap:6px;margin-bottom:12px}.opt{padding:8px 10px}.opt .lbl small{font-size:10px}details.rules{margin-bottom:12px;padding:8px 10px}details.rules ul{font-size:11px;line-height:1.35;margin-top:6px}#startBtn{font-size:16px!important;padding:.65em 1.5em!important}
   #gameScreen .board-wrap{flex:0 0 min(42dvh,350px);height:min(42dvh,350px)}
-  #gameScreen header.topbar{padding:7px 8px}.topbar .title{font-size:17px}#gameScreen .icon-btn{width:36px;height:36px;font-size:18px}#gameScreen #dock{gap:4px;padding:6px 10px}#gameScreen .turn-badge{justify-content:center;text-align:center;font-size:16px}#gameScreen .players-status{gap:6px;margin-top:4px}#gameScreen .pstat{padding:5px 8px}#gameScreen .pstat .nm{font-size:13px}#gameScreen .pstat .dot{width:20px;height:20px}#gameScreen .sticks-area{gap:6px;padding:4px 4px 6px}#gameScreen .sticks{height:62px}#gameScreen .stick{width:22px;height:50px}#gameScreen .stick .mark{width:7px;height:7px}#gameScreen .result-label{height:26px;font-size:17px;line-height:26px}#gameScreen .result-label .kr{font-size:20px}#gameScreen .chips{min-height:32px}#gameScreen .chip{padding:6px 11px;font-size:14px}#gameScreen .hint{height:21px;font-size:13px}#gameScreen #tutorialCard{padding:10px;margin-top:6px}#gameScreen .tutorial-head h3{font-size:16px}#gameScreen .tutorial-copy{font-size:13px;line-height:1.35;margin-top:6px}#gameScreen .piece-art,#gameScreen .home-cluster [data-rslot],#gameScreen .piece>text{transform:scale(1.18);transform-box:fill-box;transform-origin:center}
+  #gameScreen header.topbar{padding:7px 8px}.topbar .title{font-size:17px}#gameScreen .icon-btn{width:36px;height:36px;font-size:18px}#gameScreen #dock{gap:4px;padding:6px 10px}#gameScreen .turn-badge{justify-content:center;text-align:center;font-size:16px}.turn-copy{justify-content:center}.turn-state{width:100%;font-size:11px}#gameScreen .players-status{gap:6px;margin-top:4px}#gameScreen .pstat{padding:5px 8px}#gameScreen .pstat .nm{font-size:13px}#gameScreen .pstat .dot{width:20px;height:20px}#gameScreen .sticks-area{gap:6px;padding:4px 4px 6px}#gameScreen .sticks{height:62px}#gameScreen .stick{width:22px;height:50px}#gameScreen .stick .mark{width:7px;height:7px}#gameScreen .throw-overlay .btn{font-size:15px;padding:.65em 1.05em}#gameScreen .result-label{height:26px;font-size:17px;line-height:26px}#gameScreen .result-label .kr{font-size:20px}#gameScreen .chips{min-height:32px}#gameScreen .chip{padding:6px 11px;font-size:14px}#gameScreen .hint{height:21px;font-size:13px}#gameScreen #tutorialCard{padding:10px;margin-top:6px}#gameScreen .tutorial-head h3{font-size:16px}#gameScreen .tutorial-copy{font-size:13px;line-height:1.35;margin-top:6px}#gameScreen .piece-art,#gameScreen .home-cluster [data-rslot],#gameScreen .piece>text{transform:scale(1.18);transform-box:fill-box;transform-origin:center}
 }
 @media(max-width:480px){.difficulty-options{grid-template-columns:1fr}.difficulty-card{min-height:0;text-align:center}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.05ms!important}}
@@ -315,7 +320,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
       <div id="dock">
         <div class="pblock glass">
           <h4 data-i18n="panel.turn">Turno</h4>
-          <div class="turn-badge" id="turnBadge"><span class="turn-dot" style="background:#ff5a6e"></span> <span>Giocatore 1</span></div>
+          <div class="turn-badge" id="turnBadge" aria-live="polite" aria-atomic="true"><span class="turn-dot"></span><span class="turn-copy"><span class="turn-player">Giocatore 1</span><span class="turn-state">Pronto al lancio</span></span></div>
           <div class="players-status" id="playersStatus" style="margin-top:12px"></div>
         </div>
         <div class="pblock glass">
@@ -323,6 +328,7 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
           <div class="sticks-area">
             <div class="yut3d-wrap">
               <div id="yut3d-container" role="button" tabindex="0" aria-label="Clicca sul tavolo per lanciare i quattro bastoncini Yut"></div>
+              <div class="throw-overlay hidden" id="throwOverlay"><button class="btn" id="throwOverlayBtn" type="button">🎲 Lancia i bastoncini</button></div>
             </div>
             <div class="sticks hidden" id="sticks" aria-hidden="true"></div>
           </div>
@@ -380,6 +386,13 @@ ko:"게임이 아직 진행 중입니다. 정말 메인 메뉴로 돌아갈까�
 zh:"对局仍在进行中。确定要返回主菜单吗？未保存的进度将会丢失。"
 };
 const confirmLeaveGame=()=>window.confirm(MENU_CONFIRM_I18N[I18N.cur]||MENU_CONFIRM_I18N.en);
+const TURN_STATE_I18N={
+it:{throw:"Pronto al lancio",again:"Puoi rilanciare o muovere",move:"Scegli una pedina",cpu:"Turno della CPU",rolloff:"Sorteggio in corso",busy:"Azione in corso",over:"Partita conclusa"},
+en:{throw:"Ready to throw",again:"Throw again or move",move:"Choose a piece",cpu:"CPU's turn",rolloff:"Choosing the first player",busy:"Action in progress",over:"Game over"},
+ko:{throw:"던질 차례",again:"다시 던지거나 말을 움직이세요",move:"말을 선택하세요",cpu:"CPU 차례",rolloff:"선공 결정 중",busy:"진행 중",over:"게임 종료"},
+zh:{throw:"等待投掷",again:"可再次投掷或移动棋子",move:"请选择棋子",cpu:"电脑回合",rolloff:"正在决定先手",busy:"进行中",over:"对局结束"}
+};
+const turnStateT=key=>(TURN_STATE_I18N[I18N.cur]||TURN_STATE_I18N.en)[key]||key;
 let lastResult=null;
 const THEME_I18N={
 it:{title:"Tema del tabellone",'modern.title':"✦ Modern",'modern.desc':"L'aspetto attuale",'traditional.title':"🪵 Traditional",'traditional.desc':"Carta e legno coreani",toggle:"Cambia tema del tabellone"},
@@ -614,8 +627,13 @@ function initYut3D(){
       });
       if(YUT3D.pending){
         const p=YUT3D.pending,elapsed=now-p.started;
-        const stopped=sticks.every(({body})=>body.sleepState===C.Body.SLEEPING||(body.velocity.length()<.075&&body.angularVelocity.length()<.075&&body.position.y<.9));
-        if((elapsed>650&&stopped)||elapsed>6500)finishYut3DThrow();
+        if(p.forced){
+          if(!p.settle&&elapsed>=(REDUCED?100:850))startForcedYut3DSettle(p,now);
+          if(p.settle&&stepForcedYut3DSettle(p,now))finishYut3DThrow();
+        }else{
+          const stopped=sticks.every(({body})=>body.sleepState===C.Body.SLEEPING||(body.velocity.length()<.075&&body.angularVelocity.length()<.075&&body.position.y<.9));
+          if((elapsed>650&&stopped)||elapsed>6500)finishYut3DThrow();
+        }
       }
       renderer.render(scene,camera);requestAnimationFrame(frame);
     };
@@ -624,6 +642,7 @@ function initYut3D(){
 }
 function resetYut3D(){
   if(!YUT3D)return;
+  cancelYut3DThrow();
   YUT3D.sticks.forEach(({body},i)=>{
     body.wakeUp();body.position.set((i-1.5)*.82,.32,(i%2-.5)*.18);
     body.quaternion.setFromEuler(i%2?0:Math.PI,0,(i-1.5)*.025);
@@ -639,13 +658,53 @@ function orientYut3D(ups){
     body.velocity.set(0,0,0);body.angularVelocity.set(0,0,0);body.sleep();
   });
 }
+function startForcedYut3DSettle(pending,now){
+  if(!YUT3D||!pending.forced||pending.settle)return;
+  const duration=REDUCED?120:360;
+  pending.settle={started:now,duration,poses:YUT3D.sticks.map(({body},i)=>{
+    const targetPosition=new YUT3D.C.Vec3((i-1.5)*.82,.32,(i%2-.5)*.16);
+    const targetQuaternion=new YUT3D.C.Quaternion();
+    targetQuaternion.setFromEuler(pending.forced.ups[i]?Math.PI:0,0,(i-1.5)*.035);
+    const pose={
+      fromPosition:body.position.clone(),
+      fromQuaternion:body.quaternion.clone(),
+      targetPosition,
+      targetQuaternion
+    };
+    body.velocity.set(0,0,0);body.angularVelocity.set(0,0,0);body.sleep();
+    return pose;
+  })};
+}
+function stepForcedYut3DSettle(pending,now){
+  if(!YUT3D||!pending.settle)return false;
+  const settle=pending.settle;
+  const raw=Math.max(0,Math.min(1,(now-settle.started)/settle.duration));
+  const t=1-Math.pow(1-raw,3);
+  YUT3D.sticks.forEach(({body},i)=>{
+    const pose=settle.poses[i];
+    body.position.set(
+      pose.fromPosition.x+(pose.targetPosition.x-pose.fromPosition.x)*t,
+      pose.fromPosition.y+(pose.targetPosition.y-pose.fromPosition.y)*t,
+      pose.fromPosition.z+(pose.targetPosition.z-pose.fromPosition.z)*t
+    );
+    pose.fromQuaternion.slerp(pose.targetQuaternion,t,body.quaternion);
+  });
+  return raw>=1;
+}
+function cancelYut3DThrow(){
+  if(!YUT3D||!YUT3D.pending)return;
+  const {resolve}=YUT3D.pending;
+  YUT3D.pending=null;
+  resolve(null);
+}
 function finishYut3DThrow(){
   if(!YUT3D||!YUT3D.pending)return;
   const {resolve,backDo,forced}=YUT3D.pending;YUT3D.pending=null;
+  if(forced){orientYut3D(forced.ups);resolve(forced);return;}
   const up=new YUT3D.THREE.Vector3(0,1,0),normal=new YUT3D.THREE.Vector3();
   const ups=YUT3D.sticks.map(({mesh})=>normal.set(0,-1,0).applyQuaternion(mesh.quaternion).dot(up)>0);
   const result=resultFromUps(ups,backDo);
-  if(forced){orientYut3D(forced.ups);resolve(forced);}else resolve(result);
+  resolve(result);
 }
 function yutLaunchPointFromEvent(event){
   if(!YUT3D||!event||!Number.isFinite(event.clientX))return{x:0,z:0};
@@ -720,7 +779,21 @@ const TUTORIAL_TURNS=[
  {player:1,result:'do',source:5,dest:11,text:'cpu'},
  {player:0,result:'do',source:4,finish:true,text:'score',expect:'finish'}
 ];
-function tutorialResult(key){const map={do:{ups:[true,false,false,false],kr:'도',name:'Do',val:1,extra:false},gae:{ups:[true,true,false,false],kr:'개',name:'Gae',val:2,extra:false},geol:{ups:[true,true,true,false],kr:'걸',name:'Geol',val:3,extra:false},yut:{ups:[true,true,true,true],kr:'윷',name:'Yut',val:4,extra:true},mo:{ups:[false,false,false,false],kr:'모',name:'Mo',val:5,extra:true},backdo:{ups:[true,false,false,false],kr:'빽도',name:'Back-do',val:-1,extra:false}};return{...map[key],key};}
+const TUTORIAL_UPS={
+  do:[false,true,false,false],
+  gae:[true,true,false,false],
+  geol:[true,true,true,false],
+  yut:[true,true,true,true],
+  mo:[false,false,false,false],
+  backdo:[true,false,false,false]
+};
+function tutorialResult(key){
+  const ups=TUTORIAL_UPS[key];
+  if(!ups)throw new Error('Risultato tutorial sconosciuto: '+key);
+  const result=resultFromUps(ups.slice(),true);
+  if(result.key!==key)throw new Error('Configurazione tutorial incoerente: '+key);
+  return result;
+}
 const TUTORIAL_STEP_I18N={
 it:{title:"Partita guidata contro la CPU",enter:"Lancia Gae, poi porta una pedina rossa dalla riserva alla casella evidenziata.",cpu:"Osserva la mossa della CPU: durante il suo turno i controlli restano bloccati.",group:"Fai entrare una seconda pedina sulla prima: si raggrupperanno e viaggeranno insieme.",capture:"Fai entrare una nuova pedina sulla pedina blu: la catturerai e otterrai un rilancio.",captureBonus:"Usa il rilancio ottenuto dalla cattura per raggiungere l'angolo.",shortcut:"Dall'angolo scegli la destinazione evidenziata sulla diagonale: è una scorciatoia.",center:"Avanza fino al centro, una casella speciale con più percorsi.",backdo:"Con Back-do devi arretrare: scegli il ramo evidenziato per tornare verso l'angolo.",mo:"Mo vale 5 passi e concede un rilancio. Muovi la pedina lungo la diagonale.",moBonus:"Usa subito il rilancio concesso da Mo per avvicinarti al traguardo.",finishSquare:"Raggiungi 출발. Attenzione: essere sulla casella finale non assegna ancora il punto.",score:"Fai un ultimo passo oltre 출발 per completare la pedina e conquistare il primo punto.",doneTitle:"Primo punto conquistato!",done:"Hai imparato ingresso, turni, raggruppamento, cattura, rilanci, scorciatoie, Back-do e uscita.",errorTitle:"Tutorial interrotto",error:"La sequenza guidata ha rilevato uno stato inatteso. Torna alle opzioni e riavvia il tutorial."},
 en:{title:"Guided game vs CPU",enter:"Throw Gae, then bring a red piece from reserve to the highlighted space.",cpu:"Watch the CPU move. Your controls stay locked during its turn.",group:"Bring a second piece onto the first one: they will stack and travel together.",capture:"Bring a new piece onto the blue piece: you will capture it and earn an extra throw.",captureBonus:"Use the extra throw earned by the capture to reach the corner.",shortcut:"At the corner, choose the highlighted diagonal destination: it is a shortcut.",center:"Move to the center, a special space with multiple routes.",backdo:"Back-do moves you backward: choose the highlighted branch toward the corner.",mo:"Mo moves 5 spaces and grants an extra throw. Move along the diagonal.",moBonus:"Use Mo's extra throw immediately to approach the finish.",finishSquare:"Reach 출발. Landing on the final space does not score yet.",score:"Take one final step beyond 출발 to complete the piece and score the first point.",doneTitle:"First point scored!",done:"You learned entry, turns, stacking, captures, extra throws, shortcuts, Back-do and finishing.",errorTitle:"Tutorial interrupted",error:"The guided sequence detected an unexpected state. Return to the options and restart the tutorial."},
@@ -732,14 +805,14 @@ let tutorialRunSerial=0;
 function tutorialAccepts(m){if(!T||T.done||T.failed)return true;const e=TUTORIAL_TURNS[T.index],d=m.path[m.path.length-1];return e&&e.player===0&&m.source===e.source&&(e.finish?m.finish:!m.finish&&d===e.dest);}
 function tutorialProgressText(current,total){const text={it:"Mossa guidata {0} di {1}",en:"Guided move {0} of {1}",ko:"안내 이동 {0}/{1}",zh:"引导移动 {0} / {1}"};return(text[I18N.cur]||text.en).replace('{0}',current).replace('{1}',total);}
 function renderTutorialCard(){const card=$('#tutorialCard'),surface=$('#yut3d-container');if(!card)return;if(!T){card.classList.add('hidden');if(surface)surface.classList.remove('tutorial-focus');return;}const l=tutorialL(),sl=tutorialStepL(),step=TUTORIAL_TURNS[T.index],playerMoves=TUTORIAL_TURNS.filter(x=>x.player===0),completed=TUTORIAL_TURNS.slice(0,T.index).filter(x=>x.player===0).length,current=step&&step.player===0?completed+1:completed;card.classList.remove('hidden');$('#tutorialProgress').textContent=T.done||T.failed?'':tutorialProgressText(Math.max(1,Math.min(current,playerMoves.length)),playerMoves.length);$('#tutorialTitle').textContent=T.failed?sl.errorTitle:(T.done?sl.doneTitle:sl.title);$('#tutorialCopy').textContent=T.failed?sl.error:(T.done?sl.done:(step?sl[step.text]:''));$('#tutorialCopy').classList.toggle('tutorial-done',!!T.done);$('#tutorialExit').textContent=T.done||T.failed?l.doneBtn:l.exit;if(surface)surface.classList.toggle('tutorial-focus',!!step&&step.player===0&&G.phase==='awaitThrow'&&!G.busy&&!G.over);}
-function startTutorial(){const runId=++tutorialRunSerial;T={index:0,done:false,failed:false,runId};newGame({backDo:true,sound:setupSound,vsCPU:true,difficulty:'normal',starter:'p1',tutorial:true});$('#winOverlay').classList.add('hidden');$('#setupScreen').classList.add('hidden');$('#gameScreen').classList.remove('hidden');mobileBackNavigationArmed=false;armMobileBackNavigation();buildBoard();$('#log').innerHTML='';clearHighlights();renderTutorialCard();renderAll();}
+function startTutorial(){const runId=++tutorialRunSerial;T={index:0,done:false,failed:false,runId};newGame({backDo:true,sound:setupSound,vsCPU:true,difficulty:'normal',starter:'p1',tutorial:true});$('#winOverlay').classList.add('hidden');$('#setupScreen').classList.add('hidden');$('#gameScreen').classList.remove('hidden');initYut3D();resetYut3D();mobileBackNavigationArmed=false;armMobileBackNavigation();buildBoard();$('#log').innerHTML='';clearHighlights();renderTutorialCard();renderAll();}
 function finishTutorial(){if(!T)return;if(G.finished[0]!==1)return failTutorial();T.done=true;G.over=true;G.busy=false;G.throwsLeft=0;G.pending=[];G.phase='over';AudioFX.win();HapticFX.finish(1);renderTutorialCard();renderAll();}
 function failTutorial(){if(!T)return;T.failed=true;G.over=true;G.busy=false;G.throwsLeft=0;G.pending=[];G.phase='over';renderTutorialCard();renderAll();}
 function tutorialEventMatches(step,ev){if(!step||!step.expect)return true;if(step.expect==='group')return ev.group&&ev.groupSize===2;if(step.expect==='capture')return ev.capture===1;if(step.expect==='finish')return ev.finish===1&&G.finished[0]===1;return false;}
 function tutorialRunActive(runId){return!!T&&T.runId===runId&&!T.done&&!T.failed;}
-async function tutorialCPUReply(runId){const step=tutorialRunActive(runId)&&TUTORIAL_TURNS[T.index],game=G;if(!step||step.player!==1)return;const res=tutorialResult(step.result),move=movesForValue(1,res.val).find(m=>m.source===step.source&&(step.finish?m.finish:m.path[m.path.length-1]===step.dest));if(!move)return failTutorial();G.turn=1;G.throwsLeft=0;G.busy=true;G.phase='animating';renderTutorialCard();renderAll();await sleep(REDUCED?80:360);if(G!==game||!tutorialRunActive(runId))return;await animateSticks(res);if(G!==game||!tutorialRunActive(runId))return;lastResult=res;setResultLabel(res);AudioFX.jingle(res.key);G.stats[1].rolls++;G.stats[1].rollTotal+=res.val;log(I18N.t('log.roll',PLAYERS[1].name,res.kr,res.name,res.val,''),'p2');const animated=await animateMove(move);if(!animated||G!==game||!tutorialRunActive(runId))return;const ev=applyMove(move);recordMove(move,ev);if(!tutorialEventMatches(step,ev))return failTutorial();T.index++;if(T.index>=TUTORIAL_TURNS.length)return failTutorial();G.turn=0;G.busy=false;G.throwsLeft=1;G.pending=[];G.phase='awaitThrow';renderTutorialCard();renderAll();}
+async function tutorialCPUReply(runId){const step=tutorialRunActive(runId)&&TUTORIAL_TURNS[T.index],game=G;if(!step||step.player!==1)return;const scripted=tutorialResult(step.result),move=movesForValue(1,scripted.val).find(m=>m.source===step.source&&(step.finish?m.finish:m.path[m.path.length-1]===step.dest));if(!move)return failTutorial();G.turn=1;G.throwsLeft=0;G.busy=true;G.phase='animating';renderTutorialCard();renderAll();await sleep(REDUCED?80:360);if(G!==game||!tutorialRunActive(runId))return;const res=await throwSticks3D(G.opts.backDo,scripted,{x:0,z:0},true);if(!res||G!==game||!tutorialRunActive(runId))return;lastResult=res;setResultLabel(res);AudioFX.jingle(res.key);G.stats[1].rolls++;G.stats[1].rollTotal+=res.val;log(I18N.t('log.roll',PLAYERS[1].name,res.kr,res.name,res.val,''),'p2');const animated=await animateMove(move);if(!animated||G!==game||!tutorialRunActive(runId))return;const ev=applyMove(move);recordMove(move,ev);if(!tutorialEventMatches(step,ev))return failTutorial();T.index++;if(T.index>=TUTORIAL_TURNS.length)return failTutorial();G.turn=0;G.busy=false;G.throwsLeft=1;G.pending=[];G.phase='awaitThrow';renderTutorialCard();renderAll();}
 async function advanceTutorial(runId,ev){if(!tutorialRunActive(runId))return;const step=TUTORIAL_TURNS[T.index];if(!step||step.player!==0||!tutorialEventMatches(step,ev))return failTutorial();T.index++;if(T.index>=TUTORIAL_TURNS.length){finishTutorial();return;}if(TUTORIAL_TURNS[T.index].player===1)await tutorialCPUReply(runId);else{G.turn=0;G.busy=false;G.throwsLeft=1;G.pending=[];G.phase='awaitThrow';renderTutorialCard();renderAll();}}
-function exitTutorial(){tutorialRunSerial++;if(G&&G.opts&&G.opts.tutorial){G.over=true;G.busy=false;G.pending=[];G.throwsLeft=0;}T=null;clearHighlights();const surface=$('#yut3d-container');if(surface)surface.classList.remove('tutorial-focus');$('#tutorialCard').classList.add('hidden');$('#gameScreen').classList.add('hidden');$('#winOverlay').classList.add('hidden');$('#setupScreen').classList.remove('hidden');}
+function exitTutorial(){tutorialRunSerial++;if(G&&G.opts&&G.opts.tutorial){G.over=true;G.busy=false;G.pending=[];G.throwsLeft=0;}T=null;resetYut3D();clearHighlights();const surface=$('#yut3d-container');if(surface)surface.classList.remove('tutorial-focus');$('#tutorialCard').classList.add('hidden');$('#gameScreen').classList.add('hidden');$('#winOverlay').classList.add('hidden');$('#setupScreen').classList.remove('hidden');}
 function stacksOf(pl){return G.stacks.filter(s=>s.player===pl);}
 function stackAt(node){return G.stacks.find(s=>s.node===node);}
 function movesForValue(pl,val){const out=[];if(val>0&&G.homeCount[pl]>0){for(const r of simulate(HOME,val,0))out.push({source:'home',player:pl,val,path:r.path,finish:r.finish,toHome:false});}for(const s of stacksOf(pl)){if(val===-1){for(const bd of backMoves(s.node))out.push({source:s.id,player:pl,val,path:bd.path,finish:false,toHome:!!bd.toHome,back:true});}else{for(const r of simulate(s.node,val,s.dist))out.push({source:s.id,player:pl,val,path:r.path,finish:r.finish,toHome:false});}}return out;}
@@ -763,12 +836,16 @@ pieceLayer=el('g',{id:'pieceLayer'},board);hlLayer=el('g',{id:'hlLayer'},board);
 function clusterOffsets(n){if(n===1)return[{x:0,y:0}];if(n===2)return[{x:-9,y:0},{x:9,y:0}];if(n===3)return[{x:0,y:-10},{x:-10,y:8},{x:10,y:8}];return[{x:-8,y:-8},{x:8,y:-8},{x:-8,y:8},{x:8,y:8}];}
 function makePieceEl(pl,count,pos){const g=document.createElementNS(SVGNS,'g');g.setAttribute('class','piece '+PLAYERS[pl].css);g.style.transform='translate('+(pos?pos.x:0)+'px,'+(pos?pos.y:0)+'px)';const art=el('g',{class:'piece-art'},g),offs=clusterOffsets(Math.min(count,4));offs.forEach(o=>{el('circle',{cx:o.x,cy:o.y,r:19,fill:'url(#g'+PLAYERS[pl].css+')'},art);});el('circle',{r:23,class:'ring'},art);if(count>1){const t=el('text',{x:0,y:0,class:'lbl',fill:'#fff'},art);t.textContent=count;}return g;}
 function isMovableSource(sid){if(G.phase!=='awaitMove'||G.busy||G.over)return false;if(G.turn===1&&G.opts.vsCPU)return false;const ci=G.selChip??(G.pending.length===1?0:null);if(ci===null)return false;const val=G.pending[ci].val;return movesForValue(G.turn,val).some(m=>m.source===sid&&tutorialAccepts(m));}
-function renderPieces(){if(!pieceLayer)return;pieceLayer.querySelectorAll('.home-cluster').forEach(e=>e.remove());const existing={};pieceLayer.querySelectorAll('g[data-sid]').forEach(e=>existing[e.dataset.sid]=e);G.stacks.forEach(s=>{const n=NODES[s.node];if(!n)return;let g=existing[s.id];delete existing[s.id];if(!g){g=makePieceEl(s.player,s.count,n);g.dataset.sid=s.id;pieceLayer.appendChild(g);}g.style.transform='translate('+n.x+'px,'+n.y+'px)';const t=g.querySelector('text');if(s.count>1){if(!t){const tx=el('text',{x:0,y:0,class:'lbl',fill:'#fff'},g);tx.textContent=s.count;}else t.textContent=s.count;}else if(t)t.remove();const mv=isMovableSource(s.id);g.classList.toggle('movable',mv);g.onclick=mv?()=>onPieceClick(s):null;});Object.values(existing).forEach(e=>e.remove());PLAYERS.forEach((p,pi)=>{const hc=G.homeCount[pi];if(hc>0){const g=document.createElementNS(SVGNS,'g');g.setAttribute('class','piece home-cluster '+p.css);const z=RESERVE_ZONES[pi];g.style.transform='translate('+z.x+'px,'+z.y+'px)';for(let k=0;k<hc;k++){const cy=RESERVE_SLOT_DY[k],sg=el('g',{'data-rslot':k},g);el('circle',{cx:0,cy,r:19,fill:'url(#g'+p.css+')'},sg);el('circle',{cx:0,cy,r:23,class:'ring'},sg);}const can=pi===G.turn&&isMovableSource('home');g.classList.toggle('movable',can);g.onclick=can?()=>onPieceClick('home'):null;pieceLayer.appendChild(g);}});}
+function isTutorialTargetSource(sid){const step=T&&TUTORIAL_TURNS[T.index];return!!step&&step.player===G.turn&&step.source===sid&&isMovableSource(sid);}
+function renderPieces(){if(!pieceLayer)return;pieceLayer.querySelectorAll('.home-cluster').forEach(e=>e.remove());const existing={};pieceLayer.querySelectorAll('g[data-sid]').forEach(e=>existing[e.dataset.sid]=e);G.stacks.forEach(s=>{const n=NODES[s.node];if(!n)return;let g=existing[s.id];delete existing[s.id];if(!g){g=makePieceEl(s.player,s.count,n);g.dataset.sid=s.id;pieceLayer.appendChild(g);}g.style.transform='translate('+n.x+'px,'+n.y+'px)';const t=g.querySelector('text');if(s.count>1){if(!t){const tx=el('text',{x:0,y:0,class:'lbl',fill:'#fff'},g);tx.textContent=s.count;}else t.textContent=s.count;}else if(t)t.remove();const mv=isMovableSource(s.id);g.classList.toggle('movable',mv);g.classList.toggle('tutorial-target',isTutorialTargetSource(s.id));g.onclick=mv?()=>onPieceClick(s):null;});Object.values(existing).forEach(e=>e.remove());PLAYERS.forEach((p,pi)=>{const hc=G.homeCount[pi];if(hc>0){const g=document.createElementNS(SVGNS,'g');g.setAttribute('class','piece home-cluster '+p.css);const z=RESERVE_ZONES[pi];g.style.transform='translate('+z.x+'px,'+z.y+'px)';for(let k=0;k<hc;k++){const cy=RESERVE_SLOT_DY[k],sg=el('g',{'data-rslot':k},g);el('circle',{cx:0,cy,r:19,fill:'url(#g'+p.css+')'},sg);el('circle',{cx:0,cy,r:23,class:'ring'},sg);}const can=pi===G.turn&&isMovableSource('home');g.classList.toggle('movable',can);g.classList.toggle('tutorial-target',pi===G.turn&&isTutorialTargetSource('home'));g.onclick=can?()=>onPieceClick('home'):null;pieceLayer.appendChild(g);}});}
 function renderChips(){const c=$('#chips');c.innerHTML='';G.pending.forEach((p,i)=>{const b=document.createElement('button');b.className='chip'+(p.val===-1?' back':'')+(i===G.selChip?' sel':'');b.textContent=p.kr+' '+(p.val>0?p.val:'-1');b.onclick=()=>{if(G.busy||G.over)return;if(G.turn===1&&G.opts.vsCPU)return;AudioFX.click();G.selChip=(G.selChip===i?null:i);clearHighlights();renderChips();renderPieces();updateHint();};c.appendChild(b);});}
-function renderStatus(){const box=$('#playersStatus');box.innerHTML='';PLAYERS.forEach((p,i)=>{const home=G.homeCount[i],done=G.finished[i],onBoard=4-home-done;const row=document.createElement('div');row.className='pstat';row.style.color=p.color;const nm=document.createElement('span');nm.className='nm';nm.style.color=p.color;nm.textContent=p.name;row.appendChild(nm);const dots=document.createElement('div');dots.className='dots';for(let k=0;k<4;k++){const d=document.createElement('div');d.className='dot';d.dataset.p=i;d.dataset.k=k;if(k<done)d.classList.add('done');else if(k>=done+onBoard)d.classList.add('home');const canHome=(k>=done+onBoard)&&i===G.turn&&G.phase==='awaitMove'&&!G.busy&&!(G.opts.vsCPU&&G.turn===1);if(canHome){const ci=G.selChip??(G.pending.length===1?0:null);const val=ci!==null?G.pending[ci].val:null;if(val>0&&G.homeCount[i]>0)d.onclick=()=>onPieceClick('home');}dots.appendChild(d);}row.appendChild(dots);box.appendChild(row);});}
-function renderTurn(){const p=PLAYERS[G.turn];$('#turnBadge').innerHTML='<span class="turn-dot" style="background:'+p.color+'"></span> <span style="color:'+p.color+'">'+p.name+'</span>';}
-function updateHint(){const h=$('#hint');if(G.over){h.textContent='';return;}if(G.phase==='rolloff'){h.textContent=startT('hint');return;}if(G.opts.vsCPU&&G.turn===1){h.textContent=I18N.t('hint.cpu');return;}if(G.phase==='awaitThrow'||(G.phase==='awaitMove'&&G.pending.length===0))h.textContent=I18N.t('hint.throw');else if(G.phase==='awaitMove'){if(G.selChip===null&&G.pending.length>1)h.textContent=I18N.t('hint.selectChip');else h.textContent=I18N.t('hint.selectPiece');}else h.textContent='';}
-function updateThrowBtn(){const b=$('#yut3d-container');if(!b)return;const disabled=!(G.throwsLeft>0&&!G.busy&&!G.over&&G.phase!=='animating'&&!(G.opts.vsCPU&&G.turn===1));b.classList.toggle('disabled',disabled);b.classList.toggle('throw-ready',!disabled);b.setAttribute('aria-disabled',String(disabled));}
+function renderStatus(){const box=$('#playersStatus');box.innerHTML='';PLAYERS.forEach((p,i)=>{const home=G.homeCount[i],done=G.finished[i],onBoard=4-home-done;const row=document.createElement('div');row.className='pstat';row.style.color=p.color;row.style.setProperty('--player-color',p.color);const active=i===G.turn;row.classList.toggle('active',active);if(active)row.setAttribute('aria-current','true');const nm=document.createElement('span');nm.className='nm';nm.style.color=p.color;nm.textContent=p.name;row.appendChild(nm);const dots=document.createElement('div');dots.className='dots';for(let k=0;k<4;k++){const d=document.createElement('div');d.className='dot';d.dataset.p=i;d.dataset.k=k;if(k<done)d.classList.add('done');else if(k>=done+onBoard)d.classList.add('home');const canHome=(k>=done+onBoard)&&i===G.turn&&G.phase==='awaitMove'&&!G.busy&&!(G.opts.vsCPU&&G.turn===1);if(canHome){const ci=G.selChip??(G.pending.length===1?0:null);const val=ci!==null?G.pending[ci].val:null;if(val>0&&G.homeCount[i]>0)d.onclick=()=>onPieceClick('home');}dots.appendChild(d);}row.appendChild(dots);box.appendChild(row);});}
+function currentTurnState(){if(G.over)return turnStateT('over');if(G.phase==='rolloff')return turnStateT('rolloff');if(G.opts.vsCPU&&G.turn===1)return turnStateT('cpu');if(G.phase==='awaitThrow')return turnStateT('throw');if(G.phase==='awaitMove')return canThrow()?turnStateT('again'):turnStateT('move');return turnStateT('busy');}
+function renderTurn(){const p=PLAYERS[G.turn],badge=$('#turnBadge');badge.style.setProperty('--turn-color',p.color);badge.innerHTML='';const dot=document.createElement('span');dot.className='turn-dot';const copy=document.createElement('span');copy.className='turn-copy';const name=document.createElement('span');name.className='turn-player';name.textContent=p.name;const state=document.createElement('span');state.className='turn-state';state.textContent=currentTurnState();copy.append(name,state);badge.append(dot,copy);badge.setAttribute('aria-label',p.name+'. '+state.textContent);}
+function updateHint(){const h=$('#hint');if(G.over){h.textContent='';return;}if(G.phase==='rolloff'){h.textContent=startT('hint');return;}if(G.opts.vsCPU&&G.turn===1){h.textContent=I18N.t('hint.cpu');return;}if(G.phase==='awaitThrow'||(G.phase==='awaitMove'&&G.pending.length===0))h.textContent=I18N.t('hint.throw');else if(G.phase==='awaitMove'){if(canThrow())h.textContent=turnStateT('again');else if(G.selChip===null&&G.pending.length>1)h.textContent=I18N.t('hint.selectChip');else h.textContent=I18N.t('hint.selectPiece');}else h.textContent='';}
+function canThrow(){return !!(G&&G.throwsLeft>0&&!G.busy&&!G.over&&G.phase!=='animating'&&!(G.opts.vsCPU&&G.turn===1));}
+function shouldShowThrowOverlay(){return canThrow()&&(G.phase==='awaitThrow'||G.phase==='awaitMove')&&!T;}
+function updateThrowBtn(){const b=$('#yut3d-container'),overlay=$('#throwOverlay'),overlayBtn=$('#throwOverlayBtn'),enabled=canThrow(),showOverlay=shouldShowThrowOverlay();if(b){b.classList.toggle('disabled',!enabled);b.classList.toggle('throw-ready',enabled);b.setAttribute('aria-disabled',String(!enabled));}if(overlay)overlay.classList.toggle('hidden',!showOverlay);if(overlayBtn){overlayBtn.disabled=!showOverlay;overlayBtn.textContent=I18N.t('throw.btn');}}
 function log(msg,cls){const l=$('#log');const r=document.createElement('div');r.className='row'+(cls?' '+cls:'');r.innerHTML=msg;l.prepend(r);while(l.children.length>40)l.lastChild.remove();const lb=$('#logBtn');if(lb){lb.classList.remove('pulse');void lb.offsetWidth;lb.classList.add('pulse');}}
 function renderAll(){renderTurn();renderPieces();renderChips();renderStatus();updateHint();updateThrowBtn();if(T)renderTutorialCard();}
 function momLegendItem(color,label,ev){const s=document.createElement('span');const i=document.createElement('i');if(ev)i.className='ev';i.style.background=color;s.append(i,document.createTextNode(label));return s;}
@@ -817,17 +894,17 @@ await sleep(BACK_MS+(v.count-1)*gap+60);fl.forEach(([g])=>g.remove());}
 async function animateMove(m){const game=G,pl=m.player;let g,temp=false,fromReserve=false;if(m.source==='home'){const z=RESERVE_ZONES[pl],k=Math.min(Math.max(game.homeCount[pl]-1,0),RESERVE_SLOT_DY.length-1);const hidden=pieceLayer.querySelector('.home-cluster.'+PLAYERS[pl].css+' [data-rslot="'+k+'"]');if(hidden)hidden.style.opacity='0';g=makePieceEl(pl,1,{x:z.x,y:z.y+RESERVE_SLOT_DY[k]});pieceLayer.appendChild(g);temp=true;fromReserve=true;}else{g=pieceLayer.querySelector('g[data-sid="'+m.source+'"]');if(!g){g=makePieceEl(pl,1,NODES[m.path[0]]);pieceLayer.appendChild(g);temp=true;}}
 if(temp)void g.getBoundingClientRect();
 for(let i=0;i<m.path.length;i++){const node=m.path[i];if(node===HOME){g.style.transition='opacity .25s';g.style.opacity='0';await sleep(250);if(G!==game){if(temp)g.remove();return false;}break;}const n=NODES[node];const ent=i===0&&fromReserve;if(ent){g.classList.add('entering');g.style.transition='transform '+ENTER_MS+'ms cubic-bezier(.34,1.32,.5,1)';}g.style.transform='translate('+n.x+'px,'+n.y+'px)';if(i>0||ent)AudioFX.step();await sleep(ent?ENTER_MS+40:(REDUCED?60:210));if(G!==game){if(temp)g.remove();return false;}if(ent){g.classList.remove('entering');g.style.transition='';}}if(m.finish){const st=m.source==='home'?null:game.stacks.find(s=>s.id===m.source);await flyToScore(pl,st?st.count:1,g,game);if(G!==game){if(temp)g.remove();return false;}}if(temp)g.remove();return true;}
-async function executeMove(m){if(G.busy)return;const game=G,tutorialRun=T&&T.runId;G.busy=true;G.phase='animating';clearHighlights();const ci=G.selChip??0;G.pending.splice(ci,1);G.selChip=null;renderChips();renderPieces();updateHint();renderTutorialCard();const animated=await animateMove(m);if(!animated||G!==game)return;if(tutorialRun&&!tutorialRunActive(tutorialRun)){G.busy=false;return;}const vic=victimSnapshot(m);const ev=applyMove(m);recordMove(m,ev);if(ev.capture)G.turnEv.cap[m.player]+=ev.capture;if(ev.finish)G.turnEv.fin[m.player]+=ev.finish;if(ev.capture){AudioFX.capture();HapticFX.capture(ev.capture);burst(m.path[m.path.length-1],'#ffffff');await flyToReserve(vic);if(G!==game)return;if(tutorialRun&&!tutorialRunActive(tutorialRun)){G.busy=false;return;}G.throwsLeft++;log(I18N.t(ev.capture>1?'log.capture':'log.capture.one',PLAYERS[m.player].name,ev.capture),'p'+(m.player+1));}if(ev.group){AudioFX.group();log(I18N.t('log.group',PLAYERS[m.player].name),'p'+(m.player+1));}if(ev.finish){AudioFX.finish();HapticFX.finish(ev.finish);log(I18N.t(ev.finish>1?'log.finish':'log.finish.one',PLAYERS[m.player].name,ev.finish,G.finished[m.player]),'p'+(m.player+1));}if(ev.toHome)log(I18N.t('log.backhome',PLAYERS[m.player].name),'p'+(m.player+1));renderAll();if(ev.finish)popScoreDots(m.player,G.finished[m.player]-ev.finish,ev.finish);if(tutorialRun){G.busy=false;await advanceTutorial(tutorialRun,ev);return;}if(G.finished[m.player]>=4){return win(m.player);}G.busy=false;settleTurn();}
+async function executeMove(m){if(G.busy)return;const game=G,tutorialRun=T&&T.runId;G.busy=true;G.phase='animating';clearHighlights();const ci=G.selChip??0;G.pending.splice(ci,1);G.selChip=null;renderAll();const animated=await animateMove(m);if(!animated||G!==game)return;if(tutorialRun&&!tutorialRunActive(tutorialRun)){G.busy=false;return;}const vic=victimSnapshot(m);const ev=applyMove(m);recordMove(m,ev);if(ev.capture)G.turnEv.cap[m.player]+=ev.capture;if(ev.finish)G.turnEv.fin[m.player]+=ev.finish;if(ev.capture){AudioFX.capture();HapticFX.capture(ev.capture);burst(m.path[m.path.length-1],'#ffffff');await flyToReserve(vic);if(G!==game)return;if(tutorialRun&&!tutorialRunActive(tutorialRun)){G.busy=false;return;}G.throwsLeft++;log(I18N.t(ev.capture>1?'log.capture':'log.capture.one',PLAYERS[m.player].name,ev.capture),'p'+(m.player+1));}if(ev.group){AudioFX.group();log(I18N.t('log.group',PLAYERS[m.player].name),'p'+(m.player+1));}if(ev.finish){AudioFX.finish();HapticFX.finish(ev.finish);log(I18N.t(ev.finish>1?'log.finish':'log.finish.one',PLAYERS[m.player].name,ev.finish,G.finished[m.player]),'p'+(m.player+1));}if(ev.toHome)log(I18N.t('log.backhome',PLAYERS[m.player].name),'p'+(m.player+1));renderAll();if(ev.finish)popScoreDots(m.player,G.finished[m.player]-ev.finish,ev.finish);if(tutorialRun){G.busy=false;await advanceTutorial(tutorialRun,ev);return;}if(G.finished[m.player]>=4){return win(m.player);}G.busy=false;settleTurn();}
 async function animateSticks(res){const sticks=$('#sticks');sticks.innerHTML='';const els=[];for(let i=0;i<4;i++){const s=document.createElement('div');s.className='stick';const fr=document.createElement('div');fr.className='face front';s.appendChild(fr);const bk=document.createElement('div');bk.className='face back';s.appendChild(bk);if(i===0){const mk=document.createElement('div');mk.className='mark';fr.appendChild(mk);}sticks.appendChild(s);els.push(s);}void sticks.offsetWidth;els.forEach((s,i)=>{s.style.animationDelay=(i*0.08)+'s';s.classList.add('flipping');});AudioFX.throwSticks();$('#resultLabel').textContent='';await sleep(REDUCED?200:900);els.forEach((s,i)=>{s.classList.remove('flipping');s.style.transition='transform .3s';s.style.transform=res.ups[i]?'rotateX(0deg)':'rotateX(180deg)';});await sleep(180);}
 function setResultLabel(res){const e=$('#resultLabel');e.innerHTML='<span class="kr">'+res.kr+'</span> · '+res.name+' '+(res.val>0?res.val:'-1')+(res.extra?' <span style="color:var(--good)">'+I18N.t('result.again')+'</span>':'');e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');}
 async function rollOff(){G.busy=true;G.phase='rolloff';renderAll();log(I18N.t('log.rolloff'),'');
 let winner=null;
 while(winner===null){const vals=[];
-for(let pl=0;pl<2;pl++){G.turn=pl;renderTurn();updateHint();await sleep(REDUCED?120:400);const res=await throwSticks3D(false);vals.push(res.val);HapticFX.roll(res.val,res.key);setResultLabel(res);AudioFX.jingle(res.key);log(I18N.t('log.rolloff.throw',PLAYERS[pl].name,res.kr,res.name,res.val),'p'+(pl+1));}
+for(let pl=0;pl<2;pl++){G.turn=pl;renderAll();await sleep(REDUCED?120:400);const res=await throwSticks3D(false);vals.push(res.val);HapticFX.roll(res.val,res.key);setResultLabel(res);AudioFX.jingle(res.key);log(I18N.t('log.rolloff.throw',PLAYERS[pl].name,res.kr,res.name,res.val),'p'+(pl+1));}
 if(vals[0]===vals[1])log(I18N.t('log.rolloff.tie'),'');else winner=vals[0]>vals[1]?0:1;}
 G.turn=winner;G.busy=false;G.phase='awaitThrow';log(I18N.t('log.rolloff.win',PLAYERS[winner].name),'p'+(winner+1));renderAll();
 if(G.opts.vsCPU&&G.turn===1)cpuPlay();}
-async function doThrow(trigger){if(!G||G.busy||G.over)return;if(G.throwsLeft<=0)return;const game=G,tutorialRun=T&&T.runId,tutorialStep=T&&TUTORIAL_TURNS[T.index];if(T&&(!tutorialStep||tutorialStep.player!==G.turn||G.phase!=='awaitThrow'))return;const launchPoint=yutLaunchPointFromEvent(trigger),cpuHighRelease=!T&&G.opts.vsCPU&&G.turn===1;G.busy=true;G.phase='animating';updateThrowBtn();renderTutorialCard();AudioFX.unlock();const scripted=T?tutorialResult(tutorialStep.result):null;const res=await throwSticks3D(G.opts.backDo,scripted,launchPoint,cpuHighRelease);lastResult=res;if(G!==game)return;if(tutorialRun&&!tutorialRunActive(tutorialRun)){G.busy=false;return;}HapticFX.roll(res.val,res.key);const stats=G.stats[G.turn];stats.rolls++;stats.rollTotal+=res.val;if(res.extra)stats.bonus++;if(res.key==='backdo')stats.backdo++;G.pending.push(res);if(T){G.throwsLeft=res.extra?1:0;}else{G.throwsLeft-=1;if(res.extra)G.throwsLeft+=1;}AudioFX.jingle(res.key);setResultLabel(res);log(I18N.t('log.roll',PLAYERS[G.turn].name,res.kr,res.name,(res.val>0?res.val:'-1'),(res.extra?I18N.t('log.extra'):'')),'p'+(G.turn+1));G.busy=false;G.selChip=null;settleTurn();}
+async function doThrow(trigger){if(!G||G.busy||G.over)return;if(G.throwsLeft<=0)return;const game=G,tutorialRun=T&&T.runId,tutorialStep=T&&TUTORIAL_TURNS[T.index];if(T&&(!tutorialStep||tutorialStep.player!==G.turn||G.phase!=='awaitThrow'))return;const launchPoint=yutLaunchPointFromEvent(trigger),cpuHighRelease=!T&&G.opts.vsCPU&&G.turn===1;G.busy=true;G.phase='animating';renderTurn();updateThrowBtn();renderTutorialCard();AudioFX.unlock();const scripted=T?tutorialResult(tutorialStep.result):null;const res=await throwSticks3D(G.opts.backDo,scripted,launchPoint,cpuHighRelease);if(!res||G!==game)return;if(tutorialRun&&!tutorialRunActive(tutorialRun)){G.busy=false;return;}lastResult=res;HapticFX.roll(res.val,res.key);const stats=G.stats[G.turn];stats.rolls++;stats.rollTotal+=res.val;if(res.extra)stats.bonus++;if(res.key==='backdo')stats.backdo++;G.pending.push(res);if(T){G.throwsLeft=res.extra?1:0;}else{G.throwsLeft-=1;if(res.extra)G.throwsLeft+=1;}AudioFX.jingle(res.key);setResultLabel(res);log(I18N.t('log.roll',PLAYERS[G.turn].name,res.kr,res.name,(res.val>0?res.val:'-1'),(res.extra?I18N.t('log.extra'):'')),'p'+(G.turn+1));G.busy=false;G.selChip=null;settleTurn();}
 function settleTurn(){if(G.over)return;const pl=G.turn;if(G.pending.length&&!anyLegalMove(pl)){log(I18N.t('log.nomove',PLAYERS[pl].name),'p'+(pl+1));G.pending=[];G.selChip=null;}if(G.pending.length===0&&G.throwsLeft===0){endTurn();return;}if(G.pending.length===0&&G.throwsLeft>0){G.phase='awaitThrow';G.selChip=null;renderAll();return;}G.phase='awaitMove';if(G.pending.length&&(G.selChip===null||G.selChip>=G.pending.length))G.selChip=0;const forced=!T&&G.throwsLeft===0&&!(G.opts.vsCPU&&pl===1)?forcedMove(pl):null;if(forced){G.selChip=forced.chip;renderAll();void executeMove(forced.move);return;}renderAll();}
 function endTurn(){pushMomentum();G.turn=1-G.turn;G.pending=[];G.throwsLeft=1;G.selChip=null;G.phase='awaitThrow';log(I18N.t('log.turn',PLAYERS[G.turn].name),'p'+(G.turn+1));renderAll();if(G.opts.vsCPU&&G.turn===1&&!T)cpuPlay();}
 function win(pl){G.over=true;G.phase='over';AudioFX.win();HapticFX.win();$('#winTitle').innerHTML='<span style="color:'+PLAYERS[pl].color+'">'+I18N.t('win.title',PLAYERS[pl].name)+'</span>';$('#winSub').textContent=I18N.t('win.subtitle');pushMomentum();renderMatchStats();$('#winOverlay').classList.remove('hidden');confetti();renderAll();}
@@ -852,7 +929,7 @@ function leaveTutorialForMenu(){leaveGameForMenu();}
 function handleMobileBackNavigation(){if(!mobileBackNavigationEnabled()||!mobileBackNavigationArmed||!gameIsOpen())return;mobileBackNavigationArmed=false;if(confirmLeaveGame())leaveGameForMenu(true);else armMobileBackNavigation();}
 addEventListener('popstate',handleMobileBackNavigation);
 function startGame(){const opts={backDo:setupBack,sound:setupSound,vsCPU:setupMode==='cpu',difficulty:setupDifficulty,starter:setupStarter};AudioFX.setEnabled(opts.sound);newGame(opts);buildBoard();$('#setupScreen').classList.add('hidden');$('#gameScreen').classList.remove('hidden');initYut3D();resetYut3D();mobileBackNavigationArmed=false;armMobileBackNavigation();$('#soundBtn').textContent=opts.sound?'🔊':'🔇';$('#log').innerHTML='';log(I18N.t('log.newgame'),'');renderAll();if(opts.starter==='random')rollOff();else if(opts.vsCPU&&G.turn===1)cpuPlay();}
-document.addEventListener('DOMContentLoaded',()=>{initSetup();initYut3D();$('#homeBtn').onclick=leaveGameForMenu;$('#tutorialExit').onclick=leaveTutorialForMenu;buildBoard();});
+document.addEventListener('DOMContentLoaded',()=>{initSetup();initYut3D();$('#homeBtn').onclick=leaveGameForMenu;$('#tutorialExit').onclick=leaveTutorialForMenu;$('#throwOverlayBtn').onclick=e=>{e.stopPropagation();doThrow(e.detail?e:undefined);};buildBoard();});
 </script>
 </body>
 </html>
