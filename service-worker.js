@@ -1,9 +1,14 @@
-const CACHE_NAME = 'yutnori-v2';
+const CACHE_NAME = 'yutnori-v3';
 const APP_SHELL = [
   './',
   './yutnori.html',
+  './version.json',
   './manifest.webmanifest',
-  './icons/yutnori.svg'
+  './icons/yutnori.svg',
+  './icons/yutnori-180.png',
+  './icons/yutnori-192.png',
+  './icons/yutnori-512.png',
+  './icons/yutnori-maskable-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -11,7 +16,13 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    const previousCaches = keys.filter(key => key !== CACHE_NAME && key.startsWith('yutnori-'));
+    await Promise.all(previousCaches.map(key => caches.delete(key)));
+    await self.clients.claim();
+    if (previousCaches.length) await notifyAppUpdate();
+  })());
 });
 
 async function notifyAppUpdate() {
@@ -25,9 +36,11 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const url = new URL(event.request.url);
     const isGamePage = url.origin === self.location.origin && url.pathname.endsWith('/yutnori.html');
+    const isVersionFile = url.origin === self.location.origin && url.pathname.endsWith('/version.json');
     const refreshFirst = url.origin === self.location.origin && (
       event.request.mode === 'navigate' ||
       isGamePage ||
+      isVersionFile ||
       url.pathname.endsWith('/manifest.webmanifest')
     );
     const cache = await caches.open(CACHE_NAME);
@@ -37,9 +50,9 @@ self.addEventListener('fetch', event => {
         const previous = await caches.match(event.request);
         const response = await fetch(event.request);
         if (response && response.ok) {
-          if (isGamePage && event.request.mode !== 'navigate' && previous) {
-            const [oldPage, newPage] = await Promise.all([previous.clone().text(), response.clone().text()]);
-            if (oldPage !== newPage) await notifyAppUpdate();
+          if (isVersionFile && previous) {
+            const [oldVersion, newVersion] = await Promise.all([previous.clone().text(), response.clone().text()]);
+            if (oldVersion !== newVersion) await notifyAppUpdate();
           }
           await cache.put(event.request, response.clone());
         }
@@ -55,7 +68,7 @@ self.addEventListener('fetch', event => {
     try {
       const response = await fetch(event.request);
       if (response && (response.ok || response.type === 'opaque')) {
-        cache.put(event.request, response.clone());
+        await cache.put(event.request, response.clone());
       }
       return response;
     } catch (error) {

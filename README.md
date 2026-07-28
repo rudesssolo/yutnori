@@ -35,6 +35,12 @@ Gioco tradizionale coreano in HTML — installabile come app (PWA), senza build 
 
 Apri il gioco da un indirizzo HTTPS. Su Android/Chrome comparirà il pulsante **Installa app** quando il browser lo rende disponibile; in alternativa usa il menu del browser → **Installa app** / **Aggiungi a schermata Home**. Su iPhone/iPad usa Condividi → **Aggiungi a Home** in Safari. Dopo la prima apertura il gioco rimane disponibile anche offline.
 
+## Aggiornamenti
+
+Quando pubblichi una nuova versione, incrementa il valore in `version.json` (per esempio da `2026.07.29.1` a `2026.07.29.2`). L'app installata rileverà la nuova versione e mostrerà il pulsante per aggiornarla: gli utenti non devono reinstallarla.
+
+Per eseguire i controlli automatici locali usa `node tests/smoke.js`.
+
 ## Regole rapide
 
 | Lancio | Nome | Passi | Rilancio | Probabilità |
@@ -94,6 +100,12 @@ Traditional Korean board game in HTML — installable as an app (PWA), with no b
 ## Install on a phone
 
 Open the game from an HTTPS address. Android/Chrome shows the **Install app** button when available; otherwise use the browser menu → **Install app** / **Add to Home screen**. On iPhone/iPad, use Share → **Add to Home Screen** in Safari. After its first opening, the game is available offline.
+
+## Updates
+
+When publishing a new release, increment the value in `version.json` (for example from `2026.07.29.1` to `2026.07.29.2`). Installed copies will detect it and show the update button; users do not need to reinstall the app.
+
+Run the local automated checks with `node tests/smoke.js`.
 
 ## Quick rules
 
