@@ -38,6 +38,9 @@ body[data-theme="traditional"] .board-wrap{background:repeating-linear-gradient(
 body[data-theme="traditional"] header.topbar{background:rgba(36,20,10,.78)}
 .hidden{display:none!important}
 button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent}.mode-card,.opt{-webkit-tap-highlight-color:transparent}
+button,summary,[role="button"],[role="switch"]{-webkit-tap-highlight-color:transparent}
+button:focus:not(:focus-visible),summary:focus:not(:focus-visible),[role="button"]:focus:not(:focus-visible),[role="switch"]:focus:not(:focus-visible){outline:none}
+button:focus-visible,summary:focus-visible,[role="button"]:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .screen{min-height:100vh}
 .glass{background:var(--panel);border:1px solid var(--panel-bd);border-radius:var(--rad);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow)}
 .btn{display:inline-flex;align-items:center;gap:.5em;padding:.7em 1.4em;border-radius:999px;font-weight:700;background:linear-gradient(135deg,var(--gold),#ff9f43);color:#231303;box-shadow:0 6px 18px rgba(255,170,60,.32);transition:transform .14s,filter .14s}
@@ -52,10 +55,10 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;-we
 .lang-switch button:hover{color:var(--txt)}
 .lang-switch button.sel{background:var(--gold);color:#231303}
 .lang-switch.sm button{padding:3px 8px;font-size:12px}
-#setupLang{margin-bottom:18px}
+#setupLang{align-self:center;margin-bottom:18px}
 /* SETUP */
-#setupScreen{display:flex;align-items:center;justify-content:center;padding:24px 24px 46px}.author-credit{position:fixed;z-index:2;left:12px;right:12px;bottom:max(10px,env(safe-area-inset-bottom));color:var(--mut);font-size:10px;line-height:1.2;letter-spacing:.04em;text-align:center;opacity:.72;pointer-events:none}.setup-options-btn{margin-bottom:18px}.setup-options-overlay{position:fixed;z-index:70;inset:0;display:grid;place-items:center;padding:16px;background:rgba(5,8,18,.72);backdrop-filter:blur(8px)}.setup-options-card{width:min(680px,100%);max-height:calc(100dvh - 32px);display:flex;flex-direction:column;padding:18px;text-align:left;overflow:hidden}.setup-options-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;margin-bottom:12px}.setup-options-head h2{font-size:20px}.setup-options-content{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:2px 4px 4px}.setup-options-content .theme-picker{margin-top:0}
-.setup-card{max-width:680px;width:100%;padding:40px 36px;text-align:center}
+#setupScreen{display:flex;align-items:center;justify-content:center;height:100vh;height:100dvh;min-height:100vh;overflow:hidden;padding:24px 24px 46px}.author-credit{position:fixed;z-index:2;left:12px;right:12px;bottom:max(10px,env(safe-area-inset-bottom));color:var(--mut);font-size:10px;line-height:1.2;letter-spacing:.04em;text-align:center;opacity:.72;pointer-events:none}.setup-options-btn{margin-bottom:18px}.setup-options-overlay{position:fixed;z-index:70;inset:0;display:grid;place-items:center;padding:16px;background:rgba(5,8,18,.72);backdrop-filter:blur(8px)}.setup-options-card{width:min(680px,100%);height:540px;max-height:calc(100dvh - 32px);display:flex;flex-direction:column;padding:18px;text-align:left;overflow:hidden}.setup-options-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;margin-bottom:12px}.setup-options-head h2{font-size:20px}.setup-options-content{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:2px 4px 4px}.setup-options-content .theme-picker{margin-top:0}
+.setup-card{max-width:680px;width:100%;height:620px;max-height:calc(100dvh - 70px);padding:40px 36px;text-align:center;overflow-y:auto}
 .brand{font-size:clamp(46px,9vw,76px);font-weight:800;line-height:1;background:linear-gradient(120deg,var(--gold),var(--p1) 42%,var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .tagline{color:var(--mut);margin:8px 0 28px;font-size:15px}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
@@ -226,13 +229,72 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
   #logClose{display:grid;width:34px;height:34px;font-size:16px}
   #logBtn{display:grid}
 }
-@media(max-width:600px){#setupScreen{height:100dvh;min-height:0;overflow:hidden;padding:max(8px,env(safe-area-inset-top)) 8px max(28px,calc(env(safe-area-inset-bottom) + 22px));align-items:flex-start}.author-credit{bottom:max(7px,env(safe-area-inset-bottom));font-size:9px}.setup-card{padding:14px 12px;max-height:100%;overflow:hidden}.setup-card .brand{font-size:clamp(40px,15vw,56px)}#setupLang{margin-bottom:8px}.tagline{margin:4px 0 12px;font-size:12px}.modes{gap:8px;margin-bottom:10px}.mode-card{padding:12px 8px}.mode-card .ico{font-size:28px;margin-bottom:4px}.mode-card h3{font-size:15px}.mode-card p{font-size:11px}.setup-options-btn{margin-bottom:10px}.difficulty-options{gap:6px}.difficulty-card{min-height:62px;padding:8px 6px}.difficulty-card b{font-size:12px}.difficulty-card small{font-size:10px}.theme-picker{margin:0 0 12px}.opts{gap:6px;margin-bottom:12px}.opt{padding:8px 10px}.opt .lbl small{font-size:10px}details.rules{margin-bottom:12px;padding:8px 10px}details.rules ul{font-size:11px;line-height:1.35;margin-top:6px}#startBtn{font-size:16px!important;padding:.65em 1.5em!important}
+@media(max-width:600px){#setupScreen{height:100dvh;min-height:0;overflow:hidden;padding:max(8px,env(safe-area-inset-top)) 8px max(28px,calc(env(safe-area-inset-bottom) + 22px));align-items:flex-start}.author-credit{bottom:max(7px,env(safe-area-inset-bottom));font-size:9px}.setup-card{height:530px;padding:14px 12px;max-height:100%;overflow-y:auto}.setup-card .brand{font-size:clamp(40px,15vw,56px)}#setupLang{margin-bottom:8px}.tagline{margin:4px 0 12px;font-size:12px}.modes{gap:8px;margin-bottom:10px}.mode-card{padding:12px 8px}.mode-card .ico{font-size:28px;margin-bottom:4px}.mode-card h3{font-size:15px}.mode-card p{font-size:11px}.setup-options-btn{margin-bottom:10px}.difficulty-options{gap:6px}.difficulty-card{min-height:62px;padding:8px 6px}.difficulty-card b{font-size:12px}.difficulty-card small{font-size:10px}.theme-picker{margin:0 0 12px}.opts{gap:6px;margin-bottom:12px}.opt{padding:8px 10px}.opt .lbl small{font-size:10px}details.rules{margin-bottom:12px;padding:8px 10px}details.rules ul{font-size:11px;line-height:1.35;margin-top:6px}#startBtn{font-size:16px!important;padding:.65em 1.5em!important}
+  .setup-options-overlay{padding:8px}.setup-options-card{height:calc(100dvh - 16px);max-height:none}
   #gameScreen .board-wrap{flex:0 0 min(42dvh,350px);height:min(42dvh,350px)}
   #gameScreen header.topbar{padding:max(7px,env(safe-area-inset-top)) 8px 7px}.topbar .title{font-size:17px}#gameScreen .icon-btn{width:36px;height:36px;font-size:18px}#gameScreen #dock{gap:4px;padding:6px 10px}#gameScreen .turn-badge{justify-content:center;text-align:center;font-size:16px}.turn-copy{justify-content:center}.turn-state{width:100%;font-size:11px}#gameScreen .players-status{gap:6px;margin-top:4px}#gameScreen .pstat{padding:5px 8px}#gameScreen .pstat .nm{font-size:13px}#gameScreen .pstat .dot{width:20px;height:20px}#gameScreen .sticks-area{gap:6px;padding:4px 4px 6px}#gameScreen .sticks{height:62px}#gameScreen .stick{width:22px;height:50px}#gameScreen .stick .mark{width:7px;height:7px}#gameScreen .throw-overlay .btn{font-size:15px;padding:.65em 1.05em}#gameScreen .result-label{height:26px;font-size:17px;line-height:26px}#gameScreen .result-label .kr{font-size:20px}#gameScreen .chips{min-height:32px}#gameScreen .chip{padding:6px 11px;font-size:14px}#gameScreen .hint{height:21px;font-size:13px}#gameScreen #tutorialCard{position:fixed;z-index:50;top:calc(48px + env(safe-area-inset-top));left:8px;right:8px;margin:0;padding:8px;max-height:calc(100dvh - 64px - env(safe-area-inset-top));overflow:hidden}#gameScreen .tutorial-kicker{margin-bottom:2px;font-size:10px}#gameScreen .tutorial-head h3{font-size:14px}#gameScreen .tutorial-copy{font-size:11px;line-height:1.3;margin-top:4px}#gameScreen .tutorial-exit{padding:.35em .65em;font-size:11px}#gameScreen .piece-art,#gameScreen .home-cluster [data-rslot],#gameScreen .piece>text{transform:scale(1.18);transform-box:fill-box;transform-origin:center}
 }
 @media(max-width:480px){.difficulty-options{grid-template-columns:1fr}.difficulty-card{min-height:0;text-align:center}}
 @media(max-width:480px){.update-toast{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));justify-content:space-between}}
 @media (orientation:landscape) and (max-width:980px){.landscape-notice{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;background:linear-gradient(135deg,var(--bg0),var(--bg1));text-align:center}.landscape-notice strong{font-size:20px}.landscape-notice span{font-size:42px}.landscape-notice p{max-width:280px;color:var(--mut);font-size:14px;line-height:1.45}}
+/* Keep controls and translated cards dimensionally stable. */
+#setupLang button{width:54px;height:28px;display:inline-grid;place-items:center;padding:0;white-space:nowrap}
+#gameLang button{width:28px;height:24px;display:inline-grid;place-items:center;padding:0;white-space:nowrap}
+.setup-card .mode-card{height:168px;min-height:168px;overflow:hidden}
+.setup-card .mode-card h3,.setup-card .cpu-level{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-card .mode-card p{display:-webkit-box;min-height:2.5em;overflow:hidden;line-height:1.25;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+#setupOptionsBtn{width:220px;height:44px;margin-left:auto;margin-right:auto;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setup-card>.row{align-items:center}
+.setup-card>.row .btn{width:190px;min-width:190px;height:44px;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setup-card details.rules{height:52px;overflow:hidden}
+.setup-card details.rules[open]{height:260px;overflow-y:auto}
+.setup-options-head h2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-options-content .difficulty-card{height:88px;min-height:88px;overflow:hidden}
+.setup-options-content .difficulty-card b,.setup-options-content .theme-card b,.setup-options-content .opt .lbl b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-options-content .difficulty-card small,.setup-options-content .theme-card small,.setup-options-content .opt .lbl small{display:-webkit-box;overflow:hidden;line-height:1.25;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.setup-options-content .theme-card{height:76px;min-height:76px;overflow:hidden}
+.setup-options-content .opt{height:72px;min-height:72px;overflow:hidden}
+.setup-options-content .opt .lbl{min-width:0}
+#throwOverlayBtn{width:260px;height:50px;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tutorialExit{width:88px;height:36px;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.win-card>.row .btn{width:150px;height:44px;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.update-toast>.btn{width:100px;height:36px;justify-content:center;white-space:nowrap}
+.turn-badge{height:42px;min-height:42px;overflow:hidden}
+.turn-player,.turn-state{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes rulesPanelIn{from{opacity:0;transform:translateY(18px) scale(.97);filter:brightness(.7)}to{opacity:1;transform:none;filter:none}}
+@keyframes rulesListIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes rulesItemIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+@keyframes optionsOverlayIn{from{opacity:0}to{opacity:1}}
+@keyframes optionsCardIn{from{opacity:0;transform:translateY(20px) scale(.94);filter:brightness(.72)}to{opacity:1;transform:none;filter:none}}
+.setup-options-overlay:not(.hidden){animation:optionsOverlayIn .3s ease both}
+.setup-options-overlay:not(.hidden) .setup-options-card{animation:optionsCardIn .42s cubic-bezier(.22,.8,.24,1) .04s both}
+@media(max-width:980px){
+  .turn-badge{height:60px;min-height:60px}
+}
+@media(max-width:600px){
+  .setup-card{height:100%;display:flex;flex-direction:column;position:relative}
+  .setup-card>#setupLang,.setup-card>.brand,.setup-card>.tagline,.setup-card>.modes,.setup-card>#setupOptionsBtn{flex:none}
+  .setup-card>.row{order:6;flex:none}
+  .setup-card>details.rules{order:7;flex:none;margin:12px auto 0}
+  .setup-card .mode-card{height:140px;min-height:140px}
+  .setup-card details.rules{height:44px;max-height:44px;overflow:hidden;transition:max-height .48s cubic-bezier(.22,.8,.24,1)}
+  .setup-card details.rules[open]{position:static;z-index:auto;inset:auto;width:auto;height:auto;max-height:420px;margin:12px auto 0;padding:10px 12px 12px;display:block;overflow:hidden;background:linear-gradient(145deg,color-mix(in srgb,var(--panel) 96%,var(--gold) 4%),var(--panel));box-shadow:0 0 0 1px var(--panel-bd),0 0 34px rgba(255,209,102,.2),var(--shadow);animation:rulesPanelIn .42s cubic-bezier(.22,.8,.24,1) both}
+  .setup-card details.rules summary{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none;list-style:none}
+  .setup-card details.rules summary::-webkit-details-marker{display:none}
+  .setup-card details.rules summary::after{content:'＋';font-size:20px;line-height:1;color:var(--gold);transition:transform .3s ease}
+  .setup-card details.rules[open] summary::after{content:'×';transform:rotate(90deg)}
+  .setup-card details.rules[open] ul{flex:none;overflow:visible;margin:12px 0 0 18px;padding:0;font-size:11px;line-height:1.28;animation:rulesListIn .45s .08s ease both}
+  .setup-card details.rules[open] li{margin:0 0 6px;animation:rulesItemIn .34s ease both}
+  .setup-card details.rules[open] li:nth-child(1){animation-delay:.12s}
+  .setup-card details.rules[open] li:nth-child(2){animation-delay:.17s}
+  .setup-card details.rules[open] li:nth-child(3){animation-delay:.22s}
+  .setup-card details.rules[open] li:nth-child(4){animation-delay:.27s}
+  .setup-card details.rules[open] li:nth-child(5){animation-delay:.32s}
+  .setup-card details.rules[open] li:nth-child(6){animation-delay:.37s}
+  .setup-options-content .difficulty-card{height:76px;min-height:76px}
+  .setup-options-content .theme-card{height:72px;min-height:72px}
+  .setup-options-content .opt{height:64px;min-height:64px}
+}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.05ms!important}}
 </style>
 </head>
@@ -287,6 +349,11 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
         </div>
       </section>
     </div>
+    <div class="row" style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+      <button class="btn ghost" id="tutorialBtn" data-tutorial-i18n="button">🎓 Tutorial guidato</button>
+      <button class="btn ghost hidden" id="installBtn" type="button" aria-label="Installa Yutnori">📲 Installa app</button>
+      <button class="btn" id="startBtn" style="font-size:18px;padding:.85em 2.2em" data-i18n="setup.start">▶ Inizia la partita</button>
+    </div>
     <details class="rules">
       <summary data-i18n="rules.summary">📜 Come si gioca</summary>
       <ul>
@@ -298,11 +365,6 @@ text.lbl{font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:cen
         <li data-finish-i18n="rule">Arrivare alla casella finale non basta: serve un passo ulteriore per uscire dal circuito.</li>
       </ul>
     </details>
-    <div class="row" style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
-      <button class="btn ghost" id="tutorialBtn" data-tutorial-i18n="button">🎓 Tutorial guidato</button>
-      <button class="btn ghost hidden" id="installBtn" type="button" aria-label="Installa Yutnori">📲 Installa app</button>
-      <button class="btn" id="startBtn" style="font-size:18px;padding:.85em 2.2em" data-i18n="setup.start">▶ Inizia la partita</button>
-    </div>
   </div>
   <small class="author-credit">© 2026 Marco Flavio Gemello</small>
 </div>
@@ -963,7 +1025,7 @@ let setupMode='pvp',setupBack=true,setupSound=true,setupDifficulty='normal',setu
 function setOpt(id,on){const o=$('#'+id);o.classList.toggle('on',on);o.setAttribute('aria-checked',String(on));}
 function bindOpt(id,cb){const o=$('#'+id),toggle=()=>{const on=!o.classList.contains('on');setOpt(id,on);cb(on);AudioFX.click();};o.onclick=toggle;o.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};}
 function setSetupOptionsOpen(open){const overlay=$('#setupOptionsOverlay');if(!overlay)return;overlay.classList.toggle('hidden',!open);if(open)$('#setupOptionsClose').focus();}
-function renderDifficulty(){const box=$('#cpuDifficulty'),level=$('#cpuLevelLabel');box.classList.toggle('hidden',setupMode!=='cpu');if(level)level.textContent=cpuT(setupDifficulty+'.title');QA('[data-cpu-level]').forEach(b=>b.classList.toggle('sel',b.dataset.cpuLevel===setupDifficulty));}
+function renderDifficulty(){const box=$('#cpuDifficulty'),level=$('#cpuLevelLabel');if(box)box.classList.remove('hidden');if(level)level.textContent=cpuT(setupDifficulty+'.title');QA('[data-cpu-level]').forEach(b=>b.classList.toggle('sel',b.dataset.cpuLevel===setupDifficulty));}
 function applyTheme(theme){setupTheme=theme==='traditional'?'traditional':'modern';document.body.dataset.theme=setupTheme;localStorage.setItem('yutnori_theme',setupTheme);QA('[data-theme-choice]').forEach(b=>b.classList.toggle('sel',b.dataset.themeChoice===setupTheme));const b=$('#themeBtn');if(b)b.title=themeT('toggle');const meta=$('#themeColorMeta');if(meta)meta.content=setupTheme==='traditional'?'#21150d':'#0a0e1f';}
 let installPromptEvent=null;
 let updateNoticeVisible=false;
